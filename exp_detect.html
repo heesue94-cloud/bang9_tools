@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>메이플 경험치 계산기</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+font-family:Pretendard,sans-serif;
+background:#0b1020;
+color:#fff;
+height:100vh;
+overflow:hidden;
+}
+.topbar{
+height:58px;
+display:flex;
+align-items:center;
+gap:10px;
+padding:0 16px;
+background:#0f172a;
+border-bottom:1px solid #243047;
+}
+.logo{font-weight:700;color:#65f5a2;margin-right:20px}
+.tab{
+padding:10px 14px;border-radius:10px;
+font-size:13px;font-weight:500;
+color:#9ca7bf;background:#131d33;
+}
+.active{color:#65f5a2}
+.layout{
+height:calc(100vh - 58px);
+display:grid;
+grid-template-columns:180px 1fr 260px;
+}
+.panel,.stats{padding:12px;background:#0e1527}
+.btn{
+width:100%;padding:13px;margin-bottom:10px;
+border:none;border-radius:12px;
+background:#19243b;color:white;cursor:pointer;
+font-weight:600;
+}
+.start{background:#123b29;color:#76ffb3}
+.stop{background:#401b26;color:#ff9ab0}
+.card{
+background:#151f35;
+border:1px solid #26314b;
+border-radius:12px;
+padding:12px;
+margin-bottom:10px;
+}
+.label{font-size:12px;color:#9aa8c6}
+.value{font-size:18px;font-weight:700;margin-top:6px}
+.viewer{padding:12px;display:flex;flex-direction:column}
+#container{
+flex:1;position:relative;
+border-radius:16px;
+overflow:hidden;
+background:#050913;
+border:1px solid #26314b;
+}
+video{width:100%;height:100%;object-fit:contain}
+#selection{
+position:absolute;
+border:2px solid #4cff97;
+box-shadow:0 0 12px #4cff97;
+display:none;
+pointer-events:none;
+}
+#ocrBar{
+margin-top:10px;
+padding:12px;
+background:#151f35;
+border:1px solid #26314b;
+border-radius:12px;
+}
+.notice{font-size:12px;color:#8d9ab7;line-height:1.5}
+canvas{display:none}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<div class="logo"><i class="fa-solid fa-chart-line"></i> 메이플 경험치 계산기</div>
+<div class="tab active">경험치 계산기</div>
+<div class="tab">거탐 감지 (미구현)</div>
+<div class="tab">아이템 감지 (미구현)</div>
+<div class="tab">설정 (미구현)</div>
+</div>
+
+<div class="layout">
+
+<div class="panel">
+<button class="btn" id="shareBtn"><i class="fa-solid fa-desktop"></i> 화면 공유</button>
+<button class="btn start" id="huntBtn"><i class="fa-solid fa-play"></i> 사냥 시작</button>
+<button class="btn stop" id="stopBtn"><i class="fa-solid fa-stop"></i> 사냥 종료</button>
+<button class="btn" id="resetBtn"><i class="fa-solid fa-rotate"></i> 초기화</button>
+
+<div class="card">
+<div class="label">상태</div>
+<div class="value" id="status">대기중</div>
+</div>
+
+<div class="card">
+<div class="notice">
+EXP:123456[0.00%] 전체가 보이도록 드래그하세요.
+</div>
+</div>
+</div>
+
+<div class="viewer">
+<div id="container">
+<video id="video" autoplay muted></video>
+<div id="selection"></div>
+</div>
+<div id="ocrBar">
+OCR 결과 : <span id="ocrText">-</span>
+</div>
+</div>
+
+<div class="stats">
+<div class="card"><div class="label">경과 시간</div><div class="value" id="elapsed">00:00:00</div></div>
+<div class="card"><div class="label">시작 경험치</div><div class="value" id="startExp">0</div></div>
+<div class="card"><div class="label">현재 경험치</div><div class="value" id="currentExp">0</div></div>
+<div class="card"><div class="label">총 획득 경험치</div><div class="value" id="gainExp">0</div></div>
+<div class="card"><div class="label">최근 10분 평균</div><div class="value" id="avg10">0</div></div>
+<div class="card"><div class="label">시간당 경험치</div><div class="value" id="hourly">0</div></div>
+</div>
+
+</div>
+
+<canvas id="captureCanvas"></canvas>
+
+<script>
+const video=document.getElementById('video');
+const selection=document.getElementById('selection');
+const canvas=document.getElementById('captureCanvas');
+const ctx=canvas.getContext('2d');
+
+let selecting=false,startX,startY,crop=null;
+let startExp=0,startTime=0;
+let history=[];
+let scanInterval=null;
+let clockInterval=null;
+
+function formatNumber(num){
+ return Number(num||0).toLocaleString('ko-KR');
+}
+
+shareBtn.onclick=async()=>{
+ const stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
+ video.srcObject=stream;
+ status.innerText='화면공유';
+};
+
+video.addEventListener('mousedown',e=>{
+ const r=video.getBoundingClientRect();
+ startX=e.clientX-r.left;
+ startY=e.clientY-r.top;
+ selecting=true;
+ selection.style.display='block';
+});
+
+video.addEventListener('mousemove',e=>{
+ if(!selecting) return;
+ const r=video.getBoundingClientRect();
+ const x=e.clientX-r.left;
+ const y=e.clientY-r.top;
+ selection.style.left=Math.min(startX,x)+'px';
+ selection.style.top=Math.min(startY,y)+'px';
+ selection.style.width=Math.abs(x-startX)+'px';
+ selection.style.height=Math.abs(y-startY)+'px';
+});
+
+video.addEventListener('mouseup',e=>{
+ if(!selecting) return;
+ selecting=false;
+
+ const r=video.getBoundingClientRect();
+ const x=e.clientX-r.left;
+ const y=e.clientY-r.top;
+
+ crop={
+ x:Math.min(startX,x),
+ y:Math.min(startY,y),
+ w:Math.abs(x-startX),
+ h:Math.abs(y-startY)
+ };
+});
+
+async function readExp(){
+
+ if(!crop) return null;
+
+ const scaleX=video.videoWidth/video.clientWidth;
+ const scaleY=video.videoHeight/video.clientHeight;
+
+ const sx=crop.x*scaleX;
+ const sy=crop.y*scaleY;
+ const sw=crop.w*scaleX;
+ const sh=crop.h*scaleY;
+
+ canvas.width=sw*4;
+ canvas.height=sh*4;
+
+ ctx.drawImage(video,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+
+ const result=await Tesseract.recognize(canvas,'eng');
+ const text=result.data.text||'';
+
+ ocrText.innerText=text;
+
+ let match=text.match(/(\d+)\s*\[/);
+ if(!match) match=text.match(/EXP[:\s]*(\d+)/i);
+ if(!match) match=text.match(/\d{5,}/);
+ if(!match) return null;
+
+ return parseInt(match[1]||match[0]);
+}
+
+async function updateExp(){
+ const current=await readExp();
+ if(!current) return;
+
+ currentExp.innerText=formatNumber(current);
+
+ const gain=current-startExp;
+ gainExp.innerText=formatNumber(gain);
+
+ history.push({time:Date.now(),exp:current});
+ history=history.filter(v=>v.time>=Date.now()-600000);
+
+ if(history.length>=2){
+   avg10.innerText=formatNumber(history.at(-1).exp-history[0].exp);
+ }
+
+ const hrs=(Date.now()-startTime)/3600000;
+ if(hrs>0){
+   hourly.innerText=formatNumber(Math.floor(gain/hrs));
+ }
+}
+
+function updateClock(){
+ const sec=Math.floor((Date.now()-startTime)/1000);
+ elapsed.innerText=
+ `${String(Math.floor(sec/3600)).padStart(2,'0')}:`+
+ `${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:`+
+ `${String(sec%60).padStart(2,'0')}`;
+}
+
+huntBtn.onclick=async()=>{
+ const exp=await readExp();
+ if(!exp){ alert('경험치 인식 실패'); return; }
+
+ startExp=exp;
+ startTime=Date.now();
+
+ document.getElementById('startExp').innerText=formatNumber(exp);
+
+ history=[{time:Date.now(),exp}];
+
+ clearInterval(scanInterval);
+ clearInterval(clockInterval);
+
+ scanInterval=setInterval(updateExp,5000);
+ clockInterval=setInterval(updateClock,1000);
+
+ status.innerText='측정중';
+};
+
+stopBtn.onclick=()=>{
+ clearInterval(scanInterval);
+ clearInterval(clockInterval);
+ status.innerText='정지';
+};
+
+resetBtn.onclick=()=>location.reload();
+</script>
+
+</body>
+</html>
