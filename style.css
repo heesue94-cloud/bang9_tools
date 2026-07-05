@@ -1,0 +1,171 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#111827;
+    color:#fff;
+}
+
+header{
+    height:60px;
+    background:#1a2233;
+    display:flex;
+    align-items:center;
+    padding:0 20px;
+}
+
+main{
+    display:flex;
+    height:calc(100vh - 60px);
+}
+
+#sidebar{
+    width:340px;
+    background:#182131;
+    padding:15px;
+    overflow:auto;
+}
+
+#partyArea{
+    flex:1;
+    padding:15px;
+}
+
+.user{
+    margin-bottom:18px;
+}
+
+.user-title{
+    background:#263247;
+    padding:10px 14px;
+    border-radius:10px;
+    font-weight:bold;
+}
+
+.character-list{
+    min-height:20px;
+}
+
+.character-card{
+    position:relative;
+    background:#253247;
+    border:1px solid #334155;
+    border-radius:16px;
+    padding:10px 14px;
+    margin-top:10px;
+    cursor:grab;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-height:68px;
+    transition:all .15s ease;
+}
+
+/* 버프 카드 */
+.support-card{
+    background:rgba(134,239,172,.18);
+    border:1px solid rgba(134,239,172,.45);
+}
+
+.support-card .attack{
+    color:#d8ffe3;
+}
+
+.support-card .role{
+    background:rgba(34,197,94,.20);
+    color:#d8ffe3;
+}
+
+.left{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+.topline{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.name{
+    font-size:18px;
+    font-weight:bold;
+}
+
+.info-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.role{
+    position:absolute;
+    top:8px;
+    right:8px;
+    padding:3px 10px;
+    border-radius:999px;
+    font-size:11px;
+    background:#5b2636;
+    color:#ff9ab0;
+}
+
+.attack{
+    font-size:16px;
+    font-weight:700;
+    color:#69b1ff;
+}
+
+.party-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:15px;
+}
+
+.party{
+    background:#182131;
+    border:1px solid #334155;
+    border-radius:14px;
+}
+
+.party-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px;
+    background:#263247;
+    border-radius:14px 14px 0 0;
+    font-weight:bold;
+}
+
+.party-body{
+    min-height:760px;
+    padding:10px;
+}
+
+.sortable-ghost{
+    opacity:.4;
+}
+
+.sortable-chosen{
+    transform:scale(1.03);
+}
+
+.reset-party{
+    border:none;
+    background:#ef4444;
+    color:white;
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.reset-party:hover{
+    background:#dc2626;
+}
