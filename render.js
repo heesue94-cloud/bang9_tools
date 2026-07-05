@@ -3,153 +3,152 @@
 ========================================== */
 
 function renderHeader() {
-
+    // 현재는 index.html의 헤더를 그대로 사용
 }
-
-
-/* ==========================================
-   Sidebar
-========================================== */
-
-function renderSidebar() {
-
-    const sidebar = document.getElementById("sidebar");
-
-    let html = "";
-
-    USERS.forEach(user => {
-
-        html += `
-
-        <div class="user">
-
-            <div class="user-title"
-                 style="background:${user.color};">
-
-                <div class="user-name">
-
-                    ▼ ${user.name}
-
-                </div>
-
-                <div class="user-count">
-
-                    ${user.characters.length}
-
-                </div>
-
-            </div>
-
-            <div class="character-list"
-                 data-owner="${user.id}">
-
-        `;
-
-        user.characters.forEach(char => {
-
-            html += createCharacterCard(char,user);
-
-        });
-
-        html += `
-
-            </div>
-
-        </div>
-
-        `;
-
-    });
-
-    sidebar.innerHTML = html;
-
-}
-
 
 
 /* ==========================================
    Character Card
 ========================================== */
 
-function createCharacterCard(char,user){
+function createCharacterCard(character) {
+
+    const roleText = character.role === "dealer" ? "격수" : "버프";
+
+    const user = getUser(character.owner);
 
     return `
 
-    <div class="character-card"
+        <div class="character-card"
 
-        data-id="${char.id}"
+            data-id="${character.id}"
+            data-owner="${character.owner}"
 
-        data-owner="${char.owner}"
+            style="border-left-color:${user.color};">
 
-        style="border-left-color:${user.color};">
-
-        <div class="character-top">
-
-            <div>
+            <div class="character-top">
 
                 <div class="job">
 
-                    ${char.job}
+                    ${character.job}
 
-                    ${char.memo ? `<span class="memo">${char.memo}</span>` : ""}
+                    ${
+                        character.memo
+                        ? `<span class="memo">${character.memo}</span>`
+                        : ""
+                    }
+
+                </div>
+
+                <div class="role ${character.role}">
+
+                    ${roleText}
 
                 </div>
 
             </div>
 
-            <div class="role ${char.role}">
+            <div class="info">
 
-                ${char.role=="dealer" ? "격수" : "버프"}
+                <div class="level">
+
+                    Lv.${character.level}
+
+                </div>
 
             </div>
+
+            ${
+                character.role==="dealer"
+
+                ?
+
+                `<div class="attack">
+
+                    ${character.attack.toFixed(2)}
+
+                </div>`
+
+                :
+
+                `<div class="support">
+
+                    ${character.levelRes ? "리저 " : ""}
+
+                    ${character.smoke ? "연막 " : ""}
+
+                    ${character.leaf ? "리프" : ""}
+
+                </div>`
+            }
 
         </div>
-
-        <div class="info-row">
-
-            <div class="level">
-
-                Lv.${char.level}
-
-            </div>
-
-        </div>
-
-        ${
-            char.role=="dealer"
-
-            ?
-
-            `
-
-            <div class="attack">
-
-                ${char.attack.toFixed(2)}
-
-            </div>
-
-            `
-
-            :
-
-            `
-
-            <div class="support-list">
-
-                ${char.levelRes ? "리저 " : ""}
-
-                ${char.smoke ? "연막 " : ""}
-
-                ${char.leaf ? "리프" : ""}
-
-            </div>
-
-            `
-        }
-
-    </div>
 
     `;
+
+}
+
+
+
+/* ==========================================
+   Sidebar
+========================================== */
+
+function renderSidebar(){
+
+    const sidebar=document.getElementById("sidebar");
+
+    let html="";
+
+    USERS.forEach(user=>{
+
+        html+=`
+
+            <div class="user">
+
+                <div
+                    class="user-header"
+                    style="background:${user.color};">
+
+                    <span>
+
+                        ▼ ${user.name}
+
+                    </span>
+
+                    <span class="user-count">
+
+                        ${user.characters.length}
+
+                    </span>
+
+                </div>
+
+                <div
+
+                    class="character-list"
+
+                    data-owner="${user.id}">
+
+        `;
+
+        user.characters.forEach(character=>{
+
+            html+=createCharacterCard(character);
+
+        });
+
+        html+=`
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+    sidebar.innerHTML=html;
 
 }
 
@@ -171,7 +170,7 @@ function renderParty(){
 
         <div class="party">
 
-            <div class="party-title">
+            <div class="party-header">
 
                 ${i}파티
 
@@ -179,9 +178,15 @@ function renderParty(){
 
             <div
 
-                class="party-body"
+                class="party-list"
 
                 data-party="${i}">
+
+            </div>
+
+            <div class="party-footer">
+
+                총 공격력 : -
 
             </div>
 
