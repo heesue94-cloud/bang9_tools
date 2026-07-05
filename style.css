@@ -1,11 +1,12 @@
-/* =====================================================
+/* ==========================
    RESET
-===================================================== */
+========================== */
 
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family:"Pretendard","Segoe UI",sans-serif;
 }
 
 :root{
@@ -14,21 +15,17 @@
 
     --panel:#1B2233;
 
-    --panel2:#252F45;
+    --panel2:#232D42;
 
-    --card:#2B364C;
+    --card:#2A364D;
 
-    --border:#37445D;
+    --border:#39475F;
 
     --text:#FFFFFF;
 
-    --sub:#9BA8BE;
+    --sub:#A7B2C5;
 
-    --blue:#5EA2FF;
-
-    --dealer:#A5344A;
-
-    --support:#1F714D;
+    --blue:#63A6FF;
 
 }
 
@@ -38,19 +35,14 @@ body{
 
     color:var(--text);
 
-    font-family:
-    "Pretendard",
-    "Segoe UI",
-    sans-serif;
-
     overflow:hidden;
 
 }
 
 
-/* =====================================================
-HEADER
-===================================================== */
+/* ==========================
+   HEADER
+========================== */
 
 header{
 
@@ -72,26 +64,24 @@ header{
 
 .logo{
 
-    font-size:22px;
+    font-size:26px;
 
     font-weight:700;
 
 }
 
-.header-right{
+.header-menu{
 
     display:flex;
 
     gap:10px;
 
-    align-items:center;
-
 }
 
-.header-right button,
-.header-right select{
+.header-menu button,
+.header-menu select{
 
-    height:38px;
+    height:40px;
 
     background:var(--panel2);
 
@@ -103,12 +93,14 @@ header{
 
     padding:0 14px;
 
+    cursor:pointer;
+
 }
 
 
-/* =====================================================
-MAIN
-===================================================== */
+/* ==========================
+   MAIN
+========================== */
 
 main{
 
@@ -119,9 +111,9 @@ main{
 }
 
 
-/* =====================================================
-SIDEBAR
-===================================================== */
+/* ==========================
+   SIDEBAR
+========================== */
 
 #sidebar{
 
@@ -131,9 +123,9 @@ SIDEBAR
 
     border-right:1px solid var(--border);
 
-    overflow:auto;
+    overflow-y:auto;
 
-    padding:14px;
+    padding:15px;
 
 }
 
@@ -145,67 +137,52 @@ SIDEBAR
 
 #sidebar::-webkit-scrollbar-thumb{
 
-    background:#4A556D;
+    background:#56637D;
 
     border-radius:20px;
 
 }
 
 
-/* =====================================================
-USER
-===================================================== */
+/* ==========================
+   USER
+========================== */
 
 .user{
 
-    margin-bottom:18px;
+    margin-bottom:20px;
 
 }
 
-.user-title{
+.user-header{
 
     height:44px;
 
-    border-radius:12px;
-
     display:flex;
-
-    align-items:center;
 
     justify-content:space-between;
 
+    align-items:center;
+
     padding:0 14px;
 
-    font-weight:700;
+    border-radius:12px;
 
-    cursor:pointer;
+    font-weight:bold;
 
     color:white;
 
-}
-
-.user-name{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:8px;
+    cursor:pointer;
 
 }
 
 .user-count{
 
-    opacity:.7;
+    opacity:.8;
 
     font-size:13px;
 
 }
-
-
-/* =====================================================
-CHARACTER LIST
-===================================================== */
 
 .character-list{
 
@@ -214,9 +191,9 @@ CHARACTER LIST
 }
 
 
-/* =====================================================
-CARD
-===================================================== */
+/* ==========================
+   CHARACTER CARD
+========================== */
 
 .character-card{
 
@@ -224,7 +201,7 @@ CARD
 
     border:1px solid var(--border);
 
-    border-left:5px solid red;
+    border-left:6px solid red;
 
     border-radius:18px;
 
@@ -234,7 +211,7 @@ CARD
 
     cursor:grab;
 
-    transition:.18s;
+    transition:.15s;
 
 }
 
@@ -242,7 +219,7 @@ CARD
 
     transform:translateY(-2px);
 
-    border-color:#5C9BFF;
+    border-color:#6AAEFF;
 
 }
 
@@ -266,13 +243,17 @@ CARD
 
 .memo{
 
+    color:#FFD84A;
+
     font-size:11px;
 
-    color:#FFD85B;
+    margin-left:5px;
 
 }
 
-.info-row{
+.info{
+
+    margin-top:8px;
 
     display:flex;
 
@@ -280,72 +261,64 @@ CARD
 
     align-items:center;
 
-    margin-top:8px;
-
 }
 
 .level{
 
     color:var(--sub);
 
-    font-size:14px;
-
 }
 
 .role{
 
-    padding:4px 10px;
+    font-size:11px;
+
+    padding:3px 10px;
 
     border-radius:999px;
 
-    font-size:11px;
+}
 
-    font-weight:bold;
+.role.dealer{
+
+    background:#5D2735;
+
+    color:#FF96B1;
 
 }
 
-.dealer{
+.role.support{
 
-    background:rgba(165,52,74,.25);
+    background:#235A3E;
 
-    color:#FF96A7;
-
-}
-
-.support{
-
-    background:rgba(31,113,77,.25);
-
-    color:#8DFFBE;
+    color:#9EFFC8;
 
 }
 
 .attack{
 
-    margin-top:8px;
+    margin-top:10px;
 
     color:var(--blue);
 
-    font-size:42px;
+    font-size:34px;
 
     font-weight:700;
-
-    letter-spacing:-1px;
 
 }
 
 
-/* =====================================================
-PARTY
-===================================================== */
+/* ==========================
+   PARTY
+========================== */
 
 #partyArea{
 
     flex:1;
 
-    padding:18px;
-
     overflow:auto;
+
+    padding:15px;
 
 }
 
@@ -367,13 +340,21 @@ PARTY
 
     border-radius:16px;
 
+    display:flex;
+
+    flex-direction:column;
+
     min-height:760px;
 
 }
 
-.party-title{
+.party-header{
 
-    height:48px;
+    height:50px;
+
+    background:var(--panel2);
+
+    border-bottom:1px solid var(--border);
 
     display:flex;
 
@@ -381,28 +362,38 @@ PARTY
 
     justify-content:center;
 
-    border-bottom:1px solid var(--border);
-
-    background:var(--panel2);
+    font-weight:bold;
 
     border-radius:16px 16px 0 0;
 
-    font-weight:bold;
-
 }
 
-.party-body{
+.party-list{
 
-    min-height:700px;
+    flex:1;
 
     padding:12px;
 
+    min-height:650px;
+
+}
+
+.party-footer{
+
+    border-top:1px solid var(--border);
+
+    padding:12px;
+
+    color:var(--sub);
+
+    font-size:13px;
+
 }
 
 
-/* =====================================================
-SORTABLE
-===================================================== */
+/* ==========================
+   SORTABLE
+========================== */
 
 .sortable-ghost{
 
@@ -412,7 +403,7 @@ SORTABLE
 
 .sortable-chosen{
 
-    transform:scale(1.03);
+    transform:scale(1.02);
 
 }
 
