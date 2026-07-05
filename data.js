@@ -1,9 +1,13 @@
+/* ==========================================
+   USERS
+========================================== */
+
 const USERS = [
 
     {
         id: "bang9",
         name: "방구",
-        color: "#EF4444",
+        color: "#ef4444",
 
         characters: [
 
@@ -12,9 +16,10 @@ const USERS = [
                 owner: "bang9",
 
                 job: "보마",
-                level: 200,
 
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.31
             },
@@ -24,9 +29,10 @@ const USERS = [
                 owner: "bang9",
 
                 job: "보마",
-                level: 200,
 
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.05
             },
@@ -36,14 +42,16 @@ const USERS = [
                 owner: "bang9",
 
                 job: "듀블",
-                level: 200,
 
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.45
             }
 
         ]
+
     },
 
 
@@ -53,7 +61,7 @@ const USERS = [
     {
         id: "lassom",
         name: "라썸",
-        color: "#8B5CF6",
+        color: "#8b5cf6",
 
         characters: [
 
@@ -62,11 +70,12 @@ const USERS = [
                 owner: "lassom",
 
                 job: "아란",
+
                 memo: "메2",
 
-                level: 200,
-
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.52
             },
@@ -77,9 +86,9 @@ const USERS = [
 
                 job: "보마",
 
-                level: 200,
-
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.32
             },
@@ -90,14 +99,15 @@ const USERS = [
 
                 job: "캡틴",
 
-                level: 200,
-
                 role: "dealer",
+
+                level: 200,
 
                 attack: 0.95
             }
 
         ]
+
     },
 
 
@@ -107,7 +117,7 @@ const USERS = [
     {
         id: "seunghyun",
         name: "승현",
-        color: "#22C55E",
+        color: "#22c55e",
 
         characters: [
 
@@ -116,11 +126,12 @@ const USERS = [
                 owner: "seunghyun",
 
                 job: "듀블",
+
                 memo: "메2",
 
-                level: 200,
-
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.50
             },
@@ -130,11 +141,12 @@ const USERS = [
                 owner: "seunghyun",
 
                 job: "듀블",
+
                 memo: "메2",
 
-                level: 200,
-
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.50
             },
@@ -145,14 +157,15 @@ const USERS = [
 
                 job: "나로",
 
-                level: 200,
-
                 role: "dealer",
+
+                level: 200,
 
                 attack: 0.80
             }
 
         ]
+
     },
 
 
@@ -162,7 +175,7 @@ const USERS = [
     {
         id: "zzonkku",
         name: "쫀쿠",
-        color: "#F59E0B",
+        color: "#f59e0b",
 
         characters: [
 
@@ -172,9 +185,9 @@ const USERS = [
 
                 job: "아란",
 
-                level: 200,
-
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.81
             },
@@ -185,9 +198,9 @@ const USERS = [
 
                 job: "닼나",
 
-                level: 200,
-
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.72
             },
@@ -198,9 +211,9 @@ const USERS = [
 
                 job: "아란",
 
-                level: 200,
-
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.53
             },
@@ -211,14 +224,44 @@ const USERS = [
 
                 job: "듀블",
 
-                level: 200,
-
                 role: "dealer",
+
+                level: 200,
 
                 attack: 1.46
             }
 
         ]
+
     }
 
 ];
+
+
+/* ==========================================
+   Helpers
+========================================== */
+
+function getUser(owner){
+
+    return USERS.find(user=>user.id===owner);
+
+}
+
+function getCharacter(id){
+
+    for(const user of USERS){
+
+        const character=user.characters.find(c=>c.id===id);
+
+        if(character){
+
+            return character;
+
+        }
+
+    }
+
+    return null;
+
+}
