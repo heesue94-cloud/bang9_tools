@@ -1,1 +1,423 @@
+/* =====================================================
+   RESET
+===================================================== */
 
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+
+    --bg:#141824;
+
+    --panel:#1B2233;
+
+    --panel2:#252F45;
+
+    --card:#2B364C;
+
+    --border:#37445D;
+
+    --text:#FFFFFF;
+
+    --sub:#9BA8BE;
+
+    --blue:#5EA2FF;
+
+    --dealer:#A5344A;
+
+    --support:#1F714D;
+
+}
+
+body{
+
+    background:var(--bg);
+
+    color:var(--text);
+
+    font-family:
+    "Pretendard",
+    "Segoe UI",
+    sans-serif;
+
+    overflow:hidden;
+
+}
+
+
+/* =====================================================
+HEADER
+===================================================== */
+
+header{
+
+    height:64px;
+
+    background:var(--panel);
+
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 20px;
+
+}
+
+.logo{
+
+    font-size:22px;
+
+    font-weight:700;
+
+}
+
+.header-right{
+
+    display:flex;
+
+    gap:10px;
+
+    align-items:center;
+
+}
+
+.header-right button,
+.header-right select{
+
+    height:38px;
+
+    background:var(--panel2);
+
+    color:white;
+
+    border:1px solid var(--border);
+
+    border-radius:10px;
+
+    padding:0 14px;
+
+}
+
+
+/* =====================================================
+MAIN
+===================================================== */
+
+main{
+
+    display:flex;
+
+    height:calc(100vh - 64px);
+
+}
+
+
+/* =====================================================
+SIDEBAR
+===================================================== */
+
+#sidebar{
+
+    width:340px;
+
+    background:var(--panel);
+
+    border-right:1px solid var(--border);
+
+    overflow:auto;
+
+    padding:14px;
+
+}
+
+#sidebar::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+#sidebar::-webkit-scrollbar-thumb{
+
+    background:#4A556D;
+
+    border-radius:20px;
+
+}
+
+
+/* =====================================================
+USER
+===================================================== */
+
+.user{
+
+    margin-bottom:18px;
+
+}
+
+.user-title{
+
+    height:44px;
+
+    border-radius:12px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 14px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    color:white;
+
+}
+
+.user-name{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+.user-count{
+
+    opacity:.7;
+
+    font-size:13px;
+
+}
+
+
+/* =====================================================
+CHARACTER LIST
+===================================================== */
+
+.character-list{
+
+    margin-top:10px;
+
+}
+
+
+/* =====================================================
+CARD
+===================================================== */
+
+.character-card{
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    border-left:5px solid red;
+
+    border-radius:18px;
+
+    padding:14px;
+
+    margin-bottom:10px;
+
+    cursor:grab;
+
+    transition:.18s;
+
+}
+
+.character-card:hover{
+
+    transform:translateY(-2px);
+
+    border-color:#5C9BFF;
+
+}
+
+.character-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.job{
+
+    font-size:20px;
+
+    font-weight:700;
+
+}
+
+.memo{
+
+    font-size:11px;
+
+    color:#FFD85B;
+
+}
+
+.info-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-top:8px;
+
+}
+
+.level{
+
+    color:var(--sub);
+
+    font-size:14px;
+
+}
+
+.role{
+
+    padding:4px 10px;
+
+    border-radius:999px;
+
+    font-size:11px;
+
+    font-weight:bold;
+
+}
+
+.dealer{
+
+    background:rgba(165,52,74,.25);
+
+    color:#FF96A7;
+
+}
+
+.support{
+
+    background:rgba(31,113,77,.25);
+
+    color:#8DFFBE;
+
+}
+
+.attack{
+
+    margin-top:8px;
+
+    color:var(--blue);
+
+    font-size:42px;
+
+    font-weight:700;
+
+    letter-spacing:-1px;
+
+}
+
+
+/* =====================================================
+PARTY
+===================================================== */
+
+#partyArea{
+
+    flex:1;
+
+    padding:18px;
+
+    overflow:auto;
+
+}
+
+.party-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(5,1fr);
+
+    gap:16px;
+
+}
+
+.party{
+
+    background:var(--panel);
+
+    border:1px solid var(--border);
+
+    border-radius:16px;
+
+    min-height:760px;
+
+}
+
+.party-title{
+
+    height:48px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-bottom:1px solid var(--border);
+
+    background:var(--panel2);
+
+    border-radius:16px 16px 0 0;
+
+    font-weight:bold;
+
+}
+
+.party-body{
+
+    min-height:700px;
+
+    padding:12px;
+
+}
+
+
+/* =====================================================
+SORTABLE
+===================================================== */
+
+.sortable-ghost{
+
+    opacity:.35;
+
+}
+
+.sortable-chosen{
+
+    transform:scale(1.03);
+
+}
+
+.sortable-drag{
+
+    transform:rotate(2deg);
+
+}
