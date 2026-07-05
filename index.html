@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
 
     <meta charset="UTF-8">
@@ -16,9 +17,11 @@
 
 <body>
 
-    <!-- ================= HEADER ================= -->
+    <!-- ===========================
+        HEADER
+    ============================ -->
 
-    <header id="header">
+    <header>
 
         <div class="logo">
 
@@ -26,34 +29,37 @@
 
         </div>
 
-        <div class="header-right">
+        <div class="header-menu">
 
-            <div class="boss-select">
+            <select id="bossSelect">
 
-                <select id="bossSelect">
+                <option>림보</option>
+                <option>세렌</option>
+                <option>칼로스</option>
+                <option>카링</option>
 
-                    <option>림보</option>
-                    <option>세렌</option>
-                    <option>칼로스</option>
-                    <option>카링</option>
+            </select>
 
-                </select>
+            <button id="saveBtn">
 
-            </div>
-
-            <button id="savePreset">
                 저장
+
             </button>
 
-            <button id="resetParty">
+            <button id="resetBtn">
+
                 초기화
+
             </button>
 
         </div>
 
     </header>
 
-    <!-- ================= MAIN ================= -->
+
+    <!-- ===========================
+        MAIN
+    ============================ -->
 
     <main>
 
@@ -61,29 +67,32 @@
 
         <aside id="sidebar">
 
-            <!-- render.js에서 생성 -->
-
         </aside>
 
 
-        <!-- CENTER -->
+        <!-- RIGHT -->
 
         <section id="partyArea">
-
-            <!-- render.js에서 생성 -->
 
         </section>
 
     </main>
 
 
-    <!-- ================= JS ================= -->
+    <!-- ===========================
+        JAVASCRIPT
+    ============================ -->
 
     <script src="data.js"></script>
+
     <script src="render.js"></script>
+
     <script src="drag.js"></script>
+
     <script src="storage.js"></script>
+
     <script src="app.js"></script>
 
 </body>
+
 </html>
