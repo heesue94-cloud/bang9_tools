@@ -54,4 +54,16 @@ const USERS=[
         {owner:"zzonkku",job:"리저",role:"support"}
     ]
 }
+
+
+{
+    name:"강정",
+    color:"#f59e0b",
+    characters:[
+        {owner:"gangjeong",job:"혀로",role:"dealer",attack:1.28},
+        {owner:"gangjeong",job:"피작숍",role:"dealer",attack:0.0},
+
+        {owner:"gangjeong",job:"맆혹",role:"support"},
+    ]
+}    
 ];
