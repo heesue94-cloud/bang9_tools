@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=20260815-2">
-  <link rel="stylesheet" href="auth.css?v=20260815-7">
+  <link rel="stylesheet" href="auth.css?v=20260815-8">
   <link rel="stylesheet" href="characters.css?v=20260815-1">
   <link rel="stylesheet" href="characters-v2.css?v=20260815-3">
 </head>
@@ -19,6 +19,7 @@
     <div class="account">
       <div class="auth-user" id="authUser" hidden>
         <span class="account-name" id="accountName"></span>
+        <label class="day-off-toggle"><input type="checkbox" id="dayOffToggle"><span>금일 휴무</span></label>
         <button class="icon-button" id="logoutButton" aria-label="로그아웃" title="로그아웃">↪</button>
         <img class="avatar" id="accountAvatar" alt="프로필">
       </div>
@@ -66,6 +67,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="characters.js?v=20260815-6"></script>
+  <script src="characters.js?v=20260815-7"></script>
 </body>
 </html>

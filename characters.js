@@ -75,9 +75,10 @@ async function initialize() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) return window.location.replace("index.html");
   currentUser = session.user;
-  const { data: profiles } = await supabaseClient.from("profiles").select("user_id,nickname,color");
+  const { data: profiles } = await supabaseClient.from("profiles").select("user_id,nickname,color,day_off");
   const ownProfile = (profiles || []).find(profile => profile.user_id === currentUser.id);
   currentColor = ownProfile?.color || null;
+  dayOffToggle.checked = Boolean(ownProfile?.day_off);
   occupiedColors = new Set((profiles || []).filter(profile => profile.user_id !== currentUser.id && profile.color).map(profile => profile.color));
   renderProfile(currentUser);
   if (ownProfile?.nickname) accountName.textContent = ownProfile.nickname;
@@ -191,4 +192,16 @@ myRoster.addEventListener("click", async event => {
 });
 
 logoutButton.addEventListener("click", async () => { await supabaseClient.auth.signOut(); window.location.replace("index.html"); });
+dayOffToggle.addEventListener("change", async () => {
+  const dayOff = dayOffToggle.checked;
+  dayOffToggle.disabled = true;
+  const { error } = await supabaseClient.from("profiles").update({ day_off: dayOff, updated_at: new Date().toISOString() }).eq("user_id", currentUser.id);
+  if (!error && dayOff && characters.length) await supabaseClient.from("party_assignments").delete().in("character_id", characters.map(character => character.id));
+  dayOffToggle.disabled = false;
+  if (error) {
+    dayOffToggle.checked = !dayOff;
+    return showToast(`휴무 설정 오류: ${error.message}`);
+  }
+  showToast(dayOff ? "금일 휴무로 설정했습니다." : "휴무를 해제했습니다.");
+});
 initialize();
