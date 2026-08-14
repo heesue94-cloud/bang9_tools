@@ -99,3 +99,41 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #3f82ef;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1;
+  box-shadow: inset 0 -3px 0 #2463c7;
+}
+
+/* 전체 가독성 확대 */
+.brand { font-size: 14px; }
+.account { font-size: 13px; }
+.button { font-size: 11px; }
+.boss-tab { font-size: 11px; }
+.party-count { font-size: 12px; }
+.panel-heading h2 { font-size: 11px; }
+.search-box { height: 34px; }
+.search-box input { font-size: 13px; }
+.owner-heading { padding-block: 5px; font-size: 11px; }
+.roster-card { min-height: 58px; height: auto; padding-block: 8px; }
+.card-copy strong,
+.member-card strong { font-size: 13px; }
+.card-copy small,
+.card-meta small,
+.member-card small { font-size: 11px; }
+.role,
+.mini-role { font-size: 9px; }
+.workspace-header h1 { font-size: 19px; }
+.workspace-header p { font-size: 13px; }
+.summary span { font-size: 9px; }
+.party-header strong { font-size: 13px; }
+.member-count { font-size: 10px; }
+.requirement-tag { font-size: 9px; }
+.empty-slot { font-size: 11px; }
+.member-owner { font-size: 10px; }
