@@ -53,7 +53,7 @@ async function updateAuthUI(session) {
 
 async function loadCharacters() {
   const [{ data: rows, error }, { data: profiles }] = await Promise.all([
-    supabaseClient.from("characters").select("id,user_id,class_name,role,power,created_at").order("created_at"),
+    supabaseClient.from("characters").select("id,user_id,class_name,role,power,is_unavailable,created_at").order("created_at"),
     supabaseClient.from("profiles").select("user_id,nickname,color,day_off")
   ]);
   if (error) return showToast(`캐릭터 조회 오류: ${error.message}`);
@@ -66,6 +66,7 @@ async function loadCharacters() {
     owner: profileMap.get(character.user_id)?.nickname || "이름 미설정",
     ownerColor: profileMap.get(character.user_id)?.color || "#12b95c",
     dayOff: Boolean(profileMap.get(character.user_id)?.day_off),
+    unavailable: Boolean(character.is_unavailable),
     className: character.class_name,
     role: character.role,
     power: character.power,
@@ -100,6 +101,7 @@ function subscribeToAssignments() {
     .channel("shared-party-assignments")
     .on("postgres_changes", { event: "*", schema: "public", table: "party_assignments" }, () => loadAssignments())
     .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => loadCharacters())
+    .on("postgres_changes", { event: "UPDATE", schema: "public", table: "characters" }, () => loadCharacters())
     .subscribe();
 }
 
@@ -128,6 +130,7 @@ async function moveCharacter(characterId, targetParty, targetSlot) {
   const character = byId(characterId);
   if (!character?.isMine) return showToast("본인 캐릭터만 파티에 편성할 수 있습니다.");
   if (character.dayOff) return showToast("금일 휴무 상태에서는 파티에 편성할 수 없습니다.");
+  if (character.unavailable) return showToast("SOLD OUT 캐릭터는 파티에 편성할 수 없습니다.");
   let error;
   if (targetParty === null) {
     ({ error } = await supabaseClient.from("party_assignments").delete().eq("boss_id", state.boss).eq("character_id", characterId));
@@ -185,6 +188,24 @@ characterGroups.addEventListener("click", event => {
   const owner = heading.dataset.owner;
   state.collapsed.has(owner) ? state.collapsed.delete(owner) : state.collapsed.add(owner);
   save(); renderSidebar(); bindDragAndDrop();
+});
+
+characterGroups.addEventListener("click", async event => {
+  const button = event.target.closest("[data-availability]");
+  if (!button) return;
+  event.stopPropagation();
+  const character = byId(button.dataset.availability);
+  if (!character?.isMine) return;
+  const unavailable = !character.unavailable;
+  button.disabled = true;
+  const { error } = await supabaseClient.from("characters").update({ is_unavailable: unavailable }).eq("id", character.id);
+  if (!error && unavailable) await supabaseClient.from("party_assignments").delete().eq("character_id", character.id);
+  if (error) {
+    button.disabled = false;
+    return showToast(`상태 변경 오류: ${error.message}`);
+  }
+  showToast(unavailable ? "SOLD OUT 처리했습니다." : "사용 가능 상태로 복구했습니다.");
+  await loadCharacters();
 });
 
 characterSearch.addEventListener("input", event => { state.search = event.target.value; renderSidebar(); bindDragAndDrop(); });
