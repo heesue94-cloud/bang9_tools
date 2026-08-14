@@ -46,8 +46,34 @@ function memberCard(character, partyIndex, slotIndex) {
   </article>`;
 }
 
-function emptySlot(partyIndex, slotIndex) {
-  return `<div class="empty-slot" data-party="${partyIndex}" data-slot="${slotIndex}"><span>캐릭터를 여기에 놓으세요</span></div>`;
+function emptySlot(partyIndex, slotIndex, expectedRole = null) {
+  const label = expectedRole === "dps" ? "격수를 여기에 놓으세요" : expectedRole === "buffer" ? "버프를 여기에 놓으세요" : "캐릭터를 여기에 놓으세요";
+  return `<div class="empty-slot" data-party="${partyIndex}" data-slot="${slotIndex}"><span>${label}</span></div>`;
+}
+
+function arrangePartySlots(partyCharacters, maxMembers) {
+  if (maxMembers !== 12) return Array.from({ length: maxMembers }, (_, index) => ({ character: partyCharacters[index] || null, role: null }));
+  const dealers = partyCharacters.filter(character => character.role === "dps");
+  const buffers = partyCharacters.filter(character => character.role === "buffer");
+  const top = dealers.slice(0, 6);
+  const bottom = Array(6).fill(null);
+  const usedBuffers = new Set();
+  top.forEach((dealer, index) => {
+    const matchIndex = buffers.findIndex((buffer, bufferIndex) => !usedBuffers.has(bufferIndex) && buffer.userId === dealer.userId);
+    if (matchIndex >= 0) {
+      bottom[index] = buffers[matchIndex];
+      usedBuffers.add(matchIndex);
+    }
+  });
+  buffers.forEach((buffer, bufferIndex) => {
+    if (usedBuffers.has(bufferIndex)) return;
+    const emptyIndex = bottom.findIndex(item => !item);
+    if (emptyIndex >= 0) bottom[emptyIndex] = buffer;
+  });
+  return [
+    ...Array.from({ length: 6 }, (_, index) => ({ character: top[index] || null, role: "dps" })),
+    ...Array.from({ length: 6 }, (_, index) => ({ character: bottom[index] || null, role: "buffer" }))
+  ];
 }
 
 function renderParties() {
@@ -64,7 +90,8 @@ function renderParties() {
     const tankReady = ["아란", "닼나", "뻥"].some(name => classNames.has(name));
     const sharpReady = ["보마", "샤프"].some(name => classNames.has(name));
     const requirements = `${tankReady ? "" : '<b class="requirement-tag missing-tank">콤베없음</b><b class="requirement-tag missing-tank">피뻥없음</b>'}${sharpReady ? "" : '<b class="requirement-tag missing-sharp">샤프없음</b>'}`;
-    const slots = Array.from({ length: config.maxMembers }, (_, slotIndex) => members[slotIndex] ? memberCard(byId(members[slotIndex]), partyIndex, slotIndex) : emptySlot(partyIndex, slotIndex)).join("");
+    const arrangedSlots = arrangePartySlots(partyCharacters, config.maxMembers);
+    const slots = arrangedSlots.map((slot, slotIndex) => slot.character ? memberCard(slot.character, partyIndex, slotIndex) : emptySlot(partyIndex, slotIndex, slot.role)).join("");
     return `<section class="party-card" data-party-card="${partyIndex}">
       <header class="party-header"><div><strong>파티 ${partyIndex + 1}</strong><span class="participant-count">${participantCount}인 파티</span><span class="member-count">${members.length} / ${config.maxMembers}캐릭터</span>${badges}</div>
       <div class="party-requirements">${requirements}</div></header>
