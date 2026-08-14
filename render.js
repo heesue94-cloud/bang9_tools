@@ -35,8 +35,9 @@ function renderSidebar() {
 }
 
 function memberCard(character, partyIndex, slotIndex) {
+  const ownerColor = /^#[0-9a-f]{6}$/i.test(character.ownerColor) ? character.ownerColor : "#12b95c";
   return `<article class="member-card tint-${character.color}" draggable="true" data-character="${character.id}" data-party="${partyIndex}" data-slot="${slotIndex}">
-    <span class="member-owner">${escapeHTML(character.owner)}</span>
+    <span class="member-owner" style="background:${ownerColor}">${escapeHTML(character.owner)}</span>
     <span class="class-icon ${character.color}">${character.icon}</span>
     <strong>${character.className}</strong><small>${character.role === "dps" ? `스공 ${character.power || "—"}` : "버프"}</small>
     <b class="role role-${character.role}">${roleLabel(character.role)}</b>
