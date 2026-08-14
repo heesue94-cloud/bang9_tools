@@ -55,17 +55,16 @@ function emptySlot(partyIndex, slotIndex, expectedRole = null, compact = false) 
 function arrangePartySlots(partyCharacters, maxMembers, bossId) {
   if (bossId === "horntail-normal") {
     const dealers = partyCharacters.filter(character => character.role === "dps").slice(0, 6);
-    const buffers = partyCharacters.filter(character => character.role === "buffer").slice(0, 72);
-    const bufferSlots = Array(72).fill(null);
+    const buffers = partyCharacters.filter(character => character.role === "buffer").slice(0, 18);
+    const bufferSlots = Array(18).fill(null);
     const usedBuffers = new Set();
     dealers.forEach((dealer, dealerIndex) => {
       const matches = buffers.map((buffer, index) => ({ buffer, index }))
         .filter(item => item.buffer.userId === dealer.userId);
       matches.forEach((item, matchIndex) => {
-        const row = Math.floor(matchIndex / 3);
         const column = dealerIndex * 3 + (matchIndex % 3);
-        if (row < 4) {
-          bufferSlots[row * 18 + column] = item.buffer;
+        if (matchIndex < 3) {
+          bufferSlots[column] = item.buffer;
           usedBuffers.add(item.index);
         }
       });
