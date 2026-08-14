@@ -1,0 +1,41 @@
+.avatar {
+  display: block;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #7138d0;
+  object-fit: cover;
+}
+
+.auth-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-user[hidden],
+.google-login[hidden] {
+  display: none;
+}
+
+.google-login {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #35465a;
+  background: #fff;
+  color: #263344;
+  font-family: "Rajdhani", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.google-login:hover { background: #eef3f8; }
+.google-login:disabled { opacity: .65; cursor: wait; }
+
+.google-mark {
+  color: #4285f4;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}

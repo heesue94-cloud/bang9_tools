@@ -1,4 +1,8 @@
 const storageKey = "maple-party-state-v3";
+const supabaseClient = window.supabase.createClient(
+  "https://irzptkqjoishjdlmcudu.supabase.co",
+  "sb_publishable_xoKxUCjNPS2Zyk_szaHGWg_P2cF7nV5"
+);
 const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
 const state = {
   boss: saved?.boss || "zakum",
@@ -18,6 +22,38 @@ function showToast(message) {
   toast.classList.add("show");
   clearTimeout(showToast.timer);
   showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
+}
+
+function updateAuthUI(session) {
+  const user = session?.user;
+  googleLogin.hidden = Boolean(user);
+  authUser.hidden = !user;
+  if (!user) return;
+
+  const profile = user.user_metadata || {};
+  accountName.textContent = profile.full_name || profile.name || user.email?.split("@")[0] || "사용자";
+  accountAvatar.src = profile.avatar_url || profile.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(accountName.textContent)}&background=7138d0&color=fff`;
+}
+
+async function signInWithGoogle() {
+  googleLogin.disabled = true;
+  googleLogin.textContent = "Google로 이동 중...";
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: "https://exp-tracker.xyz/" }
+  });
+  if (error) {
+    googleLogin.disabled = false;
+    googleLogin.innerHTML = '<span class="google-mark">G</span>Google로 로그인';
+    showToast(`로그인 오류: ${error.message}`);
+  }
+}
+
+async function signOut() {
+  const { error } = await supabaseClient.auth.signOut();
+  if (error) return showToast(`로그아웃 오류: ${error.message}`);
+  updateAuthUI(null);
+  showToast("로그아웃했습니다.");
 }
 
 function moveCharacter(characterId, targetParty, targetSlot) {
@@ -99,8 +135,14 @@ document.querySelector(".character-panel").addEventListener("drop", event => {
 });
 
 function openCharacterDialog() { characterForm.reset(); characterDialog.showModal(); }
-addCharacter.addEventListener("click", openCharacterDialog);
+function openCharacterDialogForUser() {
+  if (authUser.hidden) return showToast("캐릭터를 추가하려면 Google로 로그인해 주세요.");
+  openCharacterDialog();
+}
+addCharacter.addEventListener("click", openCharacterDialogForUser);
 manageCharacters.addEventListener("click", openCharacterDialog);
+googleLogin.addEventListener("click", signInWithGoogle);
+logoutButton.addEventListener("click", signOut);
 
 characterForm.addEventListener("submit", event => {
   const submitter = event.submitter;
@@ -119,4 +161,6 @@ characterForm.addEventListener("submit", event => {
   save(); characterDialog.close(); renderAll(); showToast(`${name} 캐릭터를 추가했습니다.`);
 });
 
+supabaseClient.auth.getSession().then(({ data }) => updateAuthUI(data.session));
+supabaseClient.auth.onAuthStateChange((_event, session) => updateAuthUI(session));
 renderAll();
