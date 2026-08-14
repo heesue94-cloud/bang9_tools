@@ -67,11 +67,11 @@ async function initialize() {
 }
 
 function openDialog() { newCharacterForm.reset(); formError.textContent = ""; newCharacterDialog.showModal(); }
-function closeDialog() { newCharacterDialog.close(); }
+function closeCharacterDialog() { newCharacterDialog.close(); }
 newCharacter.addEventListener("click", openDialog);
 myRoster.addEventListener("click", event => { if (event.target.closest("[data-new]")) openDialog(); });
-closeDialog.addEventListener("click", closeDialog);
-cancelDialog.addEventListener("click", closeDialog);
+document.getElementById("closeDialog").addEventListener("click", closeCharacterDialog);
+cancelDialog.addEventListener("click", closeCharacterDialog);
 
 newCharacterForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -91,7 +91,7 @@ newCharacterForm.addEventListener("submit", async event => {
   saveCharacter.disabled = false;
   saveCharacter.textContent = "등록하기";
   if (error) return formError.textContent = error.message;
-  closeDialog(); showToast("캐릭터를 등록했습니다."); await loadCharacters();
+  closeCharacterDialog(); showToast("캐릭터를 등록했습니다."); await loadCharacters();
 });
 
 myRoster.addEventListener("click", async event => {
