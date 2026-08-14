@@ -44,3 +44,7 @@
 #nicknameDialog label { display: grid; gap: 8px; color: #8296ad; }
 #nicknameDialog input { width: 100%; }
 .roster-card.locked { cursor: not-allowed; opacity: .55; }
+.party-requirements { display: flex; align-items: center; gap: 5px; }
+.requirement-tag { padding: 3px 7px; border-radius: 3px; font-family: "Space Mono"; font-size: 8px; }
+.missing-tank { color: #ff6971; background: #4a222b; }
+.missing-sharp { color: #49e4ac; background: #123f35; }

@@ -47,15 +47,21 @@ function emptySlot(partyIndex, slotIndex) {
 
 function renderParties() {
   const boss = BOSSES.find(item => item.id === state.boss);
+  const config = BOSS_CONFIGS[state.boss];
   bossName.textContent = boss.name;
   const parties = state.parties[state.boss];
   partyList.innerHTML = parties.map((members, partyIndex) => {
+    const partyCharacters = members.map(byId).filter(Boolean);
     const counts = members.map(byId).filter(Boolean).reduce((all, character) => ({ ...all, [character.role]: (all[character.role] || 0) + 1 }), {});
     const badges = Object.entries(counts).map(([role, count]) => `<b class="mini-role role-${role}">${roleLabel(role)[0]}${count}</b>`).join("");
-    const slots = Array.from({ length: 6 }, (_, slotIndex) => members[slotIndex] ? memberCard(byId(members[slotIndex]), partyIndex, slotIndex) : emptySlot(partyIndex, slotIndex)).join("");
+    const classNames = new Set(partyCharacters.map(character => character.className));
+    const tankReady = ["아란", "닼나", "뻥"].some(name => classNames.has(name));
+    const sharpReady = ["보마", "샤프"].some(name => classNames.has(name));
+    const requirements = `${tankReady ? "" : '<b class="requirement-tag missing-tank">콤베없음</b><b class="requirement-tag missing-tank">피뻥없음</b>'}${sharpReady ? "" : '<b class="requirement-tag missing-sharp">샤프없음</b>'}`;
+    const slots = Array.from({ length: config.maxMembers }, (_, slotIndex) => members[slotIndex] ? memberCard(byId(members[slotIndex]), partyIndex, slotIndex) : emptySlot(partyIndex, slotIndex)).join("");
     return `<section class="party-card" data-party-card="${partyIndex}">
-      <header class="party-header"><div><strong>파티 ${partyIndex + 1}</strong><span class="member-count">${members.length} / 6명</span>${badges}</div>
-      <div><button class="party-menu" aria-label="파티 메뉴">•••</button><button class="delete-party" data-delete="${partyIndex}" aria-label="파티 삭제">♧</button></div></header>
+      <header class="party-header"><div><strong>파티 ${partyIndex + 1}</strong><span class="member-count">${members.length} / ${config.maxMembers}명</span>${badges}</div>
+      <div class="party-requirements">${requirements}</div></header>
       <div class="slots">${slots}</div>
     </section>`;
   }).join("");
