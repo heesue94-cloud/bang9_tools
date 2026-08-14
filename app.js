@@ -6,15 +6,17 @@ const supabaseClient = window.supabase.createClient(
 const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
 const state = {
   boss: saved?.boss || "zakum",
-  characters: saved?.characters || structuredClone(CHARACTERS),
+  characters: [],
   parties: saved?.parties || structuredClone(DEFAULT_PARTIES),
   search: "",
-  collapsed: new Set(saved?.collapsed || ["메이플유저", "메이플길드"]),
+  collapsed: new Set(saved?.collapsed || []),
   drag: null
 };
+let currentUser = null;
+let currentNickname = "";
 
 function save() {
-  localStorage.setItem(storageKey, JSON.stringify({ boss: state.boss, characters: state.characters, parties: state.parties, collapsed: [...state.collapsed] }));
+  localStorage.setItem(storageKey, JSON.stringify({ boss: state.boss, parties: state.parties, collapsed: [...state.collapsed] }));
 }
 
 function showToast(message) {
@@ -24,15 +26,49 @@ function showToast(message) {
   showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
 }
 
-function updateAuthUI(session) {
+async function updateAuthUI(session) {
   const user = session?.user;
+  currentUser = user || null;
   googleLogin.hidden = Boolean(user);
   authUser.hidden = !user;
-  if (!user) return;
+  if (!user) {
+    currentNickname = "";
+    state.characters = [];
+    renderAll();
+    return;
+  }
 
   const profile = user.user_metadata || {};
-  accountName.textContent = profile.full_name || profile.name || user.email?.split("@")[0] || "사용자";
+  const { data: siteProfile } = await supabaseClient.from("profiles").select("nickname").eq("user_id", user.id).maybeSingle();
+  currentNickname = siteProfile?.nickname || "";
+  accountName.textContent = currentNickname || profile.full_name || profile.name || user.email?.split("@")[0] || "사용자";
   accountAvatar.src = profile.avatar_url || profile.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(accountName.textContent)}&background=7138d0&color=fff`;
+  await loadCharacters();
+  if (!currentNickname) openNicknameDialog();
+}
+
+async function loadCharacters() {
+  const [{ data: rows, error }, { data: profiles }] = await Promise.all([
+    supabaseClient.from("characters").select("id,user_id,class_name,role,power,created_at").order("created_at"),
+    supabaseClient.from("profiles").select("user_id,nickname")
+  ]);
+  if (error) return showToast(`캐릭터 조회 오류: ${error.message}`);
+  const nicknames = new Map((profiles || []).map(profile => [profile.user_id, profile.nickname]));
+  state.characters = (rows || []).map(character => ({
+    id: character.id,
+    owner: nicknames.get(character.user_id) || "이름 미설정",
+    className: character.class_name,
+    role: character.role,
+    power: character.power,
+    icon: character.role === "dps" ? "⚔" : "✦",
+    color: character.role === "dps" ? "red" : "mint"
+  }));
+  const validIds = new Set(state.characters.map(character => character.id));
+  Object.values(state.parties).forEach(parties => parties.forEach(party => {
+    for (let index = party.length - 1; index >= 0; index -= 1) if (!validIds.has(party[index])) party.splice(index, 1);
+  }));
+  save();
+  renderAll();
 }
 
 async function signInWithGoogle() {
@@ -134,31 +170,37 @@ document.querySelector(".character-panel").addEventListener("drop", event => {
   }
 });
 
-function openCharacterDialog() { characterForm.reset(); characterDialog.showModal(); }
 function openCharacterDialogForUser() {
   if (authUser.hidden) return showToast("캐릭터를 추가하려면 Google로 로그인해 주세요.");
-  openCharacterDialog();
+  window.location.href = "characters.html";
 }
 addCharacter.addEventListener("click", openCharacterDialogForUser);
 manageCharacters.addEventListener("click", () => { window.location.href = "characters.html"; });
 googleLogin.addEventListener("click", signInWithGoogle);
 logoutButton.addEventListener("click", signOut);
 
-characterForm.addEventListener("submit", event => {
-  const submitter = event.submitter;
-  if (submitter?.value === "cancel") return;
+function openNicknameDialog() {
+  nicknameInput.value = currentNickname;
+  nicknameError.textContent = "";
+  nicknameDialog.showModal();
+}
+function closeNicknameDialog() { nicknameDialog.close(); }
+editNickname.addEventListener("click", openNicknameDialog);
+closeNickname.addEventListener("click", closeNicknameDialog);
+cancelNickname.addEventListener("click", closeNicknameDialog);
+nicknameForm.addEventListener("submit", async event => {
   event.preventDefault();
-  if (!characterForm.reportValidity()) return;
-  const data = new FormData(characterForm);
-  const name = data.get("name").trim();
-  state.characters.push({
-    id: `${name.toLowerCase().replace(/[^a-z0-9가-힣]/g, "-")}-${Date.now()}`,
-    owner: data.get("owner").trim(), name, className: data.get("className").trim(),
-    level: Number(data.get("level")), role: data.get("role"), power: data.get("power").trim() || "—",
-    icon: "✦", color: "cyan"
-  });
-  state.collapsed.delete(data.get("owner").trim());
-  save(); characterDialog.close(); renderAll(); showToast(`${name} 캐릭터를 추가했습니다.`);
+  const nickname = nicknameInput.value.trim();
+  if (!nickname) return;
+  saveNickname.disabled = true;
+  const { error } = await supabaseClient.from("profiles").upsert({ user_id: currentUser.id, nickname }, { onConflict: "user_id" });
+  saveNickname.disabled = false;
+  if (error) return nicknameError.textContent = error.message;
+  currentNickname = nickname;
+  accountName.textContent = nickname;
+  closeNicknameDialog();
+  showToast("별명을 저장했습니다.");
+  await loadCharacters();
 });
 
 supabaseClient.auth.getSession().then(({ data }) => updateAuthUI(data.session));

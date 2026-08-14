@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=20260815-2">
-  <link rel="stylesheet" href="auth.css?v=20260815-1">
+  <link rel="stylesheet" href="auth.css?v=20260815-2">
 </head>
 <body>
   <header class="topbar">
@@ -20,6 +20,7 @@
       <button class="button google-login" id="googleLogin"><span class="google-mark">G</span>Google로 로그인</button>
       <div class="auth-user" id="authUser" hidden>
         <span class="account-name" id="accountName"></span>
+        <button class="button button-muted" id="editNickname">별명 설정</button>
         <button class="button button-muted" id="manageCharacters">캐릭터 관리</button>
         <button class="icon-button" id="logoutButton" aria-label="로그아웃" title="로그아웃">↪</button>
         <img class="avatar" id="accountAvatar" alt="프로필">
@@ -57,28 +58,19 @@
     </section>
   </main>
 
-  <dialog id="characterDialog">
-    <form method="dialog" id="characterForm">
-      <div class="dialog-title">
-        <div><span class="eyebrow">캐릭터 명단</span><h2>캐릭터 추가</h2></div>
-        <button class="icon-button" value="cancel" aria-label="닫기">×</button>
-      </div>
-      <div class="form-grid">
-        <label>소유자<input name="owner" required placeholder="개발자"></label>
-        <label>캐릭터 이름<input name="name" required placeholder="새로운영웅"></label>
-        <label>직업<input name="className" required placeholder="히어로"></label>
-        <label>레벨<input name="level" type="number" min="1" max="300" value="200" required></label>
-        <label>역할<select name="role"><option value="dps">격수</option><option value="support">서포터</option><option value="tank">탱커</option><option value="buffer">버퍼</option></select></label>
-        <label>전투력<input name="power" placeholder="5,280만"></label>
-      </div>
-      <div class="dialog-actions"><button class="button button-muted" value="cancel">취소</button><button class="button button-accent" value="default">캐릭터 추가</button></div>
+  <dialog id="nicknameDialog">
+    <form id="nicknameForm">
+      <div class="dialog-title"><div><span class="eyebrow">MY PROFILE</span><h2>사이트 별명 설정</h2></div><button class="icon-button" type="button" id="closeNickname" aria-label="닫기">×</button></div>
+      <label>별명<input name="nickname" id="nicknameInput" required maxlength="16" placeholder="사용할 별명"></label>
+      <p class="form-error" id="nicknameError"></p>
+      <div class="dialog-actions"><button class="button button-muted" type="button" id="cancelNickname">취소</button><button class="button button-accent" type="submit" id="saveNickname">저장하기</button></div>
     </form>
   </dialog>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="data.js?v=20260815-2"></script>
-  <script src="render.js?v=20260815-2"></script>
+  <script src="data.js?v=20260815-3"></script>
+  <script src="render.js?v=20260815-3"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260815-4"></script>
+  <script src="app.js?v=20260815-5"></script>
 </body>
 </html>
