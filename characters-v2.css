@@ -1,11 +1,15 @@
 .role-form-grid { grid-template-columns: 1fr 1fr; }
 .power-field[hidden] { display: none !important; }
 .roster-table-head,
-.roster-row { grid-template-columns: .8fr 1.2fr 1fr 1fr 55px; }
+.roster-row { grid-template-columns: .8fr 1.2fr 1fr 1fr 110px; }
+.row-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.edit-character,
+.delete-character { border: 0; background: none; cursor: pointer; font: inherit; }
+.edit-character { color: #ffab2e; }
 
 @media (max-width: 760px) {
   .role-form-grid { grid-template-columns: 1fr; }
   .roster-table-head { display: none; }
   .roster-row { grid-template-columns: 1fr 1fr; }
-  .roster-row .delete-character { grid-column: 2; justify-self: end; }
+  .roster-row .row-actions { grid-column: 2; justify-self: end; }
 }

@@ -10,6 +10,7 @@ const roleChoices = {
 };
 let currentUser = null;
 let characters = [];
+let editingCharacterId = null;
 
 function escapeHTML(value = "") {
   return String(value).replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
@@ -46,7 +47,7 @@ function renderCharacters() {
       <span class="character-name"><i>${escapeHTML(character.class_name.slice(0, 1))}</i><strong>${escapeHTML(character.class_name)}</strong></span>
       <span>${character.role === "dps" ? escapeHTML(character.power || "—") : "—"}</span>
       <span>${new Date(character.created_at).toLocaleDateString("ko-KR")}</span>
-      <button class="delete-character" data-delete="${character.id}" aria-label="${escapeHTML(character.class_name)} 삭제">삭제</button>
+      <span class="row-actions"><button class="edit-character" data-edit="${character.id}" aria-label="${escapeHTML(character.class_name)} 수정">수정</button><button class="delete-character" data-delete="${character.id}" aria-label="${escapeHTML(character.class_name)} 삭제">삭제</button></span>
     </article>`).join("")}
   </div>`;
 }
@@ -78,10 +79,30 @@ function updateRoleFields() {
   if (role !== "dps") newCharacterForm.elements.power.value = "";
 }
 
-function openDialog() { newCharacterForm.reset(); updateRoleFields(); formError.textContent = ""; newCharacterDialog.showModal(); }
+function openDialog(character = null) {
+  newCharacterForm.reset();
+  editingCharacterId = character?.id || null;
+  roleGroup.value = character?.role || "dps";
+  updateRoleFields();
+  if (character) {
+    classChoice.value = character.class_name;
+    newCharacterForm.elements.power.value = character.power || "";
+  }
+  dialogEyebrow.textContent = character ? "EDIT CHARACTER" : "NEW CHARACTER";
+  dialogHeading.textContent = character ? "캐릭터 수정" : "새 캐릭터 등록";
+  saveCharacter.textContent = character ? "수정하기" : "등록하기";
+  formError.textContent = "";
+  newCharacterDialog.showModal();
+}
 function closeCharacterDialog() { newCharacterDialog.close(); }
 newCharacter.addEventListener("click", openDialog);
 myRoster.addEventListener("click", event => { if (event.target.closest("[data-new]")) openDialog(); });
+myRoster.addEventListener("click", event => {
+  const button = event.target.closest("[data-edit]");
+  if (!button) return;
+  const character = characters.find(item => item.id === button.dataset.edit);
+  if (character) openDialog(character);
+});
 document.getElementById("closeDialog").addEventListener("click", closeCharacterDialog);
 cancelDialog.addEventListener("click", closeCharacterDialog);
 roleGroup.addEventListener("change", updateRoleFields);
@@ -90,7 +111,7 @@ newCharacterForm.addEventListener("submit", async event => {
   event.preventDefault();
   if (!newCharacterForm.reportValidity()) return;
   saveCharacter.disabled = true;
-  saveCharacter.textContent = "등록 중...";
+  saveCharacter.textContent = editingCharacterId ? "수정 중..." : "등록 중...";
   const form = new FormData(newCharacterForm);
   const payload = {
     user_id: currentUser.id,
@@ -100,11 +121,15 @@ newCharacterForm.addEventListener("submit", async event => {
     role: form.get("role"),
     power: form.get("role") === "dps" ? form.get("power").trim() || null : null
   };
-  const { error } = await supabaseClient.from("characters").insert(payload);
+  const query = editingCharacterId
+    ? supabaseClient.from("characters").update(payload).eq("id", editingCharacterId)
+    : supabaseClient.from("characters").insert(payload);
+  const { error } = await query;
   saveCharacter.disabled = false;
-  saveCharacter.textContent = "등록하기";
+  saveCharacter.textContent = editingCharacterId ? "수정하기" : "등록하기";
   if (error) return formError.textContent = error.message;
-  closeCharacterDialog(); showToast("캐릭터를 등록했습니다."); await loadCharacters();
+  const message = editingCharacterId ? "캐릭터를 수정했습니다." : "캐릭터를 등록했습니다.";
+  closeCharacterDialog(); showToast(message); await loadCharacters();
 });
 
 myRoster.addEventListener("click", async event => {

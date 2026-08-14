@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="style.css?v=20260815-2">
   <link rel="stylesheet" href="auth.css?v=20260815-1">
   <link rel="stylesheet" href="characters.css?v=20260815-1">
-  <link rel="stylesheet" href="characters-v2.css?v=20260815-1">
+  <link rel="stylesheet" href="characters-v2.css?v=20260815-2">
 </head>
 <body>
   <header class="topbar">
@@ -43,7 +43,7 @@
 
   <dialog id="newCharacterDialog">
     <form id="newCharacterForm">
-      <div class="dialog-title"><div><span class="eyebrow">NEW CHARACTER</span><h2>새 캐릭터 등록</h2></div><button class="icon-button" type="button" id="closeDialog" aria-label="닫기">×</button></div>
+      <div class="dialog-title"><div><span class="eyebrow" id="dialogEyebrow">NEW CHARACTER</span><h2 id="dialogHeading">새 캐릭터 등록</h2></div><button class="icon-button" type="button" id="closeDialog" aria-label="닫기">×</button></div>
       <div class="form-grid role-form-grid">
         <label>역할군<select name="role" id="roleGroup"><option value="dps">격수</option><option value="buffer">버프</option></select></label>
         <label>격수 / 버프<select name="className" id="classChoice" required></select></label>
@@ -56,6 +56,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="characters.js?v=20260815-3"></script>
+  <script src="characters.js?v=20260815-4"></script>
 </body>
 </html>
