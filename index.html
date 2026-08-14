@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=20260815-2">
-  <link rel="stylesheet" href="auth.css?v=20260815-7">
+  <link rel="stylesheet" href="auth.css?v=20260815-8">
 </head>
 <body>
   <header class="topbar">
@@ -20,6 +20,7 @@
       <button class="button google-login" id="googleLogin"><span class="google-mark">G</span>Google로 로그인</button>
       <div class="auth-user" id="authUser" hidden>
         <span class="account-name" id="accountName"></span>
+        <label class="day-off-toggle"><input type="checkbox" id="dayOffToggle"><span>금일 휴무</span></label>
         <button class="button button-muted" id="editNickname">닉네임 설정</button>
         <button class="button button-muted" id="manageCharacters">캐릭터 관리</button>
         <button class="icon-button" id="logoutButton" aria-label="로그아웃" title="로그아웃">↪</button>
@@ -68,8 +69,8 @@
 
   <div class="toast" id="toast" role="status"></div>
   <script src="data.js?v=20260815-5"></script>
-  <script src="render.js?v=20260815-7"></script>
+  <script src="render.js?v=20260815-8"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260815-12"></script>
+  <script src="app.js?v=20260815-13"></script>
 </body>
 </html>

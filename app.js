@@ -41,9 +41,10 @@ async function updateAuthUI(session) {
   }
 
   const profile = user.user_metadata || {};
-  const { data: siteProfile } = await supabaseClient.from("profiles").select("nickname").eq("user_id", user.id).maybeSingle();
+  const { data: siteProfile } = await supabaseClient.from("profiles").select("nickname,day_off").eq("user_id", user.id).maybeSingle();
   currentNickname = siteProfile?.nickname || "";
   accountName.textContent = currentNickname || profile.full_name || profile.name || user.email?.split("@")[0] || "사용자";
+  dayOffToggle.checked = Boolean(siteProfile?.day_off);
   accountAvatar.src = profile.avatar_url || profile.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(accountName.textContent)}&background=7138d0&color=fff`;
   await loadCharacters();
   subscribeToAssignments();
@@ -53,16 +54,18 @@ async function updateAuthUI(session) {
 async function loadCharacters() {
   const [{ data: rows, error }, { data: profiles }] = await Promise.all([
     supabaseClient.from("characters").select("id,user_id,class_name,role,power,created_at").order("created_at"),
-    supabaseClient.from("profiles").select("user_id,nickname,color")
+    supabaseClient.from("profiles").select("user_id,nickname,color,day_off")
   ]);
   if (error) return showToast(`캐릭터 조회 오류: ${error.message}`);
   const profileMap = new Map((profiles || []).map(profile => [profile.user_id, profile]));
+  dayOffToggle.checked = Boolean(profileMap.get(currentUser.id)?.day_off);
   state.characters = (rows || []).map(character => ({
     id: character.id,
     userId: character.user_id,
     isMine: character.user_id === currentUser.id,
     owner: profileMap.get(character.user_id)?.nickname || "이름 미설정",
     ownerColor: profileMap.get(character.user_id)?.color || "#12b95c",
+    dayOff: Boolean(profileMap.get(character.user_id)?.day_off),
     className: character.class_name,
     role: character.role,
     power: character.power,
@@ -96,6 +99,7 @@ function subscribeToAssignments() {
   assignmentsChannel = supabaseClient
     .channel("shared-party-assignments")
     .on("postgres_changes", { event: "*", schema: "public", table: "party_assignments" }, () => loadAssignments())
+    .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => loadCharacters())
     .subscribe();
 }
 
@@ -123,6 +127,7 @@ async function signOut() {
 async function moveCharacter(characterId, targetParty, targetSlot) {
   const character = byId(characterId);
   if (!character?.isMine) return showToast("본인 캐릭터만 파티에 편성할 수 있습니다.");
+  if (character.dayOff) return showToast("금일 휴무 상태에서는 파티에 편성할 수 없습니다.");
   let error;
   if (targetParty === null) {
     ({ error } = await supabaseClient.from("party_assignments").delete().eq("boss_id", state.boss).eq("character_id", characterId));
@@ -201,6 +206,22 @@ addCharacter.addEventListener("click", openCharacterDialogForUser);
 manageCharacters.addEventListener("click", () => { window.location.href = "characters.html"; });
 googleLogin.addEventListener("click", signInWithGoogle);
 logoutButton.addEventListener("click", signOut);
+dayOffToggle.addEventListener("change", async () => {
+  const dayOff = dayOffToggle.checked;
+  dayOffToggle.disabled = true;
+  const { error } = await supabaseClient.from("profiles").update({ day_off: dayOff, updated_at: new Date().toISOString() }).eq("user_id", currentUser.id);
+  if (!error && dayOff) {
+    const ownCharacterIds = state.characters.filter(character => character.isMine).map(character => character.id);
+    if (ownCharacterIds.length) await supabaseClient.from("party_assignments").delete().in("character_id", ownCharacterIds);
+  }
+  dayOffToggle.disabled = false;
+  if (error) {
+    dayOffToggle.checked = !dayOff;
+    return showToast(`휴무 설정 오류: ${error.message}`);
+  }
+  showToast(dayOff ? "금일 휴무로 설정했습니다." : "휴무를 해제했습니다.");
+  await loadCharacters();
+});
 
 function openNicknameDialog() {
   nicknameInput.value = currentNickname;
