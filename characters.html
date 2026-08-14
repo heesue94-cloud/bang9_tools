@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1119">
+  <title>캐릭터 관리 · 메이플 파티</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20260815-2">
+  <link rel="stylesheet" href="auth.css?v=20260815-1">
+  <link rel="stylesheet" href="characters.css?v=20260815-1">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">★</span><span>메이플 파티</span></a>
+    <div class="account">
+      <div class="auth-user" id="authUser" hidden>
+        <span class="account-name" id="accountName"></span>
+        <button class="icon-button" id="logoutButton" aria-label="로그아웃" title="로그아웃">↪</button>
+        <img class="avatar" id="accountAvatar" alt="프로필">
+      </div>
+    </div>
+  </header>
+
+  <main class="manage-page">
+    <a class="back-link" href="index.html">← 파티 구성으로 돌아가기</a>
+    <section class="manage-heading">
+      <div><span class="eyebrow">MY ROSTER</span><h1>내 캐릭터</h1><p>파티 구성에 사용할 캐릭터를 등록하고 관리하세요.</p></div>
+      <button class="button button-accent primary-action" id="newCharacter">＋ 새 캐릭터 등록</button>
+    </section>
+
+    <section class="roster-summary">
+      <div><strong id="characterTotal">0</strong><span>전체 캐릭터</span></div>
+      <div><strong id="dealerTotal">0</strong><span>격수</span></div>
+      <div><strong id="supportTotal">0</strong><span>지원 역할</span></div>
+    </section>
+
+    <section class="my-roster" id="myRoster" aria-live="polite"></section>
+  </main>
+
+  <dialog id="newCharacterDialog">
+    <form id="newCharacterForm">
+      <div class="dialog-title"><div><span class="eyebrow">NEW CHARACTER</span><h2>새 캐릭터 등록</h2></div><button class="icon-button" type="button" id="closeDialog" aria-label="닫기">×</button></div>
+      <div class="form-grid">
+        <label>캐릭터 이름<input name="name" required maxlength="20" placeholder="캐릭터 이름"></label>
+        <label>직업<input name="className" required maxlength="30" placeholder="예: 보우마스터"></label>
+        <label>레벨<input name="level" type="number" min="1" max="300" value="200" required></label>
+        <label>역할<select name="role"><option value="dps">격수</option><option value="support">서포터</option><option value="tank">탱커</option><option value="buffer">버퍼</option></select></label>
+        <label class="full-field">전투력<input name="power" maxlength="20" placeholder="예: 5,280만"></label>
+      </div>
+      <p class="form-error" id="formError"></p>
+      <div class="dialog-actions"><button class="button button-muted" type="button" id="cancelDialog">취소</button><button class="button button-accent" type="submit" id="saveCharacter">등록하기</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="characters.js?v=20260815-1"></script>
+</body>
+</html>

@@ -140,7 +140,7 @@ function openCharacterDialogForUser() {
   openCharacterDialog();
 }
 addCharacter.addEventListener("click", openCharacterDialogForUser);
-manageCharacters.addEventListener("click", openCharacterDialog);
+manageCharacters.addEventListener("click", () => { window.location.href = "characters.html"; });
 googleLogin.addEventListener("click", signInWithGoogle);
 logoutButton.addEventListener("click", signOut);
 
