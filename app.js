@@ -8,7 +8,10 @@ const savedBoss = BOSSES.some(boss => boss.id === saved?.boss) ? saved.boss : BO
 const state = {
   boss: savedBoss,
   characters: [],
-  parties: Object.fromEntries(Object.keys(DEFAULT_PARTIES).map(boss => [boss, saved?.parties?.[boss] || [[]]])),
+  parties: Object.fromEntries(Object.entries(BOSS_CONFIGS).map(([boss, config]) => {
+    const previous = saved?.parties?.[boss] || [];
+    return [boss, Array.from({ length: config.partyCount }, (_, index) => (previous[index] || []).slice(0, config.maxMembers))];
+  })),
   search: "",
   collapsed: new Set(saved?.collapsed || []),
   drag: null
@@ -106,7 +109,8 @@ function moveCharacter(characterId, targetParty, targetSlot) {
   if (targetParty !== null) {
     const party = parties[targetParty];
     party.splice(Math.min(targetSlot, party.length), 0, characterId);
-    if (party.length > 6) party.length = 6;
+    const maxMembers = BOSS_CONFIGS[state.boss].maxMembers;
+    if (party.length > maxMembers) party.length = maxMembers;
   }
   save();
   renderAll();
@@ -153,18 +157,6 @@ characterGroups.addEventListener("click", event => {
 });
 
 characterSearch.addEventListener("input", event => { state.search = event.target.value; renderSidebar(); bindDragAndDrop(); });
-
-addParty.addEventListener("click", () => {
-  state.parties[state.boss].push([]); save(); renderAll(); showToast("새 파티를 추가했습니다.");
-});
-
-partyList.addEventListener("click", event => {
-  const button = event.target.closest("[data-delete]");
-  if (!button) return;
-  const index = Number(button.dataset.delete);
-  if (state.parties[state.boss].length === 1) return showToast("최소 한 개의 파티가 필요합니다.");
-  state.parties[state.boss].splice(index, 1); save(); renderAll(); showToast("파티를 삭제했습니다.");
-});
 
 document.querySelector(".character-panel").addEventListener("dragover", event => event.preventDefault());
 document.querySelector(".character-panel").addEventListener("drop", event => {
