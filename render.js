@@ -1,5 +1,6 @@
 const roleLabel = role => ({ dps: "격수", buffer: "버프" }[role] || role);
 const byId = id => state.characters.find(character => character.id === id);
+const escapeHTML = value => String(value ?? "").replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
 
 function renderTabs() {
   bossTabs.innerHTML = BOSSES.map(boss => `
@@ -35,6 +36,7 @@ function renderSidebar() {
 
 function memberCard(character, partyIndex, slotIndex) {
   return `<article class="member-card tint-${character.color}" draggable="true" data-character="${character.id}" data-party="${partyIndex}" data-slot="${slotIndex}">
+    <span class="member-owner">${escapeHTML(character.owner)}</span>
     <span class="class-icon ${character.color}">${character.icon}</span>
     <strong>${character.className}</strong><small>${character.role === "dps" ? `스공 ${character.power || "—"}` : "버프"}</small>
     <b class="role role-${character.role}">${roleLabel(character.role)}</b>
