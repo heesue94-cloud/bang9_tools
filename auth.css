@@ -137,3 +137,23 @@
 .requirement-tag { font-size: 9px; }
 .empty-slot { font-size: 11px; }
 .member-owner { font-size: 10px; }
+
+/* 숫자 가독성 */
+.member-count,
+.card-copy small,
+.member-card small,
+.owner-heading b,
+.summary strong,
+.party-count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .45px;
+}
+.member-count {
+  padding: 4px 10px;
+  color: #bfd0e2;
+  font-size: 11px;
+}
+.card-copy small,
+.member-card small { color: #93abc4; }
+.owner-heading b { color: #b7cae0; }
