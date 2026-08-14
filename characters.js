@@ -8,9 +8,13 @@ const roleChoices = {
   dps: ["닼나", "듀블", "아란", "보마", "나로", "혀로", "비숍"],
   buffer: ["리프", "리저", "샤프", "분노", "연막", "뻥"]
 };
+const profileColors = ["#ff4757", "#70a1ff", "#ffd166", "#45bf8a", "#d99cff", "#ff7f50", "#c7a7a0", "#f5f0e6", "#596275", "#8e63ce", "#83f28f", "#bdeff2", "#d65ac2", "#9aa0a6", "#7a3218", "#537083", "#a5ad20", "#30343b", "#b00020", "#fff8dc"];
 let currentUser = null;
 let characters = [];
 let editingCharacterId = null;
+let currentColor = null;
+let selectedColor = null;
+let occupiedColors = new Set();
 
 function escapeHTML(value = "") {
   return String(value).replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
@@ -71,9 +75,50 @@ async function initialize() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) return window.location.replace("index.html");
   currentUser = session.user;
+  const { data: profiles } = await supabaseClient.from("profiles").select("user_id,nickname,color");
+  const ownProfile = (profiles || []).find(profile => profile.user_id === currentUser.id);
+  currentColor = ownProfile?.color || null;
+  occupiedColors = new Set((profiles || []).filter(profile => profile.user_id !== currentUser.id && profile.color).map(profile => profile.color));
   renderProfile(currentUser);
+  if (ownProfile?.nickname) accountName.textContent = ownProfile.nickname;
   await loadCharacters();
 }
+
+function renderColorPalette() {
+  colorPalette.innerHTML = profileColors.map(color => {
+    const occupied = occupiedColors.has(color);
+    const selected = selectedColor === color;
+    return `<button type="button" class="color-swatch ${occupied ? "occupied" : ""} ${selected ? "selected" : ""}" data-color="${color}" style="--swatch:${color}" ${occupied ? "disabled" : ""} aria-label="${occupied ? "사용 중인 색상" : "색상 선택"}">${occupied ? "X" : selected ? "✓" : ""}</button>`;
+  }).join("");
+}
+
+function openColorDialog() {
+  selectedColor = currentColor;
+  colorError.textContent = "";
+  renderColorPalette();
+  colorDialog.showModal();
+}
+function closeColorDialog() { colorDialog.close(); }
+openColorPicker.addEventListener("click", openColorDialog);
+closeColor.addEventListener("click", closeColorDialog);
+cancelColor.addEventListener("click", closeColorDialog);
+colorPalette.addEventListener("click", event => {
+  const swatch = event.target.closest("[data-color]");
+  if (!swatch || swatch.disabled) return;
+  selectedColor = swatch.dataset.color;
+  renderColorPalette();
+});
+colorForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!selectedColor) return colorError.textContent = "색상을 선택해 주세요.";
+  saveColor.disabled = true;
+  const { error } = await supabaseClient.from("profiles").update({ color: selectedColor, updated_at: new Date().toISOString() }).eq("user_id", currentUser.id);
+  saveColor.disabled = false;
+  if (error) return colorError.textContent = error.code === "23505" ? "방금 다른 사용자가 선택한 색상입니다." : error.message;
+  currentColor = selectedColor;
+  closeColorDialog();
+  showToast("내 컬러를 저장했습니다.");
+});
 
 function updateRoleFields() {
   const role = roleGroup.value;
