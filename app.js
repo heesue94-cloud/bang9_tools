@@ -182,7 +182,7 @@ logoutButton.addEventListener("click", signOut);
 function openNicknameDialog() {
   nicknameInput.value = currentNickname;
   nicknameError.textContent = "";
-  nicknameDialog.showModal();
+  if (!nicknameDialog.open) nicknameDialog.showModal();
 }
 function closeNicknameDialog() { nicknameDialog.close(); }
 editNickname.addEventListener("click", openNicknameDialog);
