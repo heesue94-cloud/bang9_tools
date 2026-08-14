@@ -69,6 +69,8 @@ async function loadCharacters() {
     icon: character.role === "dps" ? "⚔" : "✦",
     color: character.role === "dps" ? "red" : "mint"
   }));
+  const myOwners = new Set(state.characters.filter(character => character.isMine).map(character => character.owner));
+  state.collapsed = new Set(state.characters.filter(character => !myOwners.has(character.owner)).map(character => character.owner));
   await loadAssignments();
 }
 
