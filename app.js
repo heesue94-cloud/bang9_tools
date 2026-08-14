@@ -4,10 +4,11 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_xoKxUCjNPS2Zyk_szaHGWg_P2cF7nV5"
 );
 const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+const savedBoss = BOSSES.some(boss => boss.id === saved?.boss) ? saved.boss : BOSSES[0].id;
 const state = {
-  boss: saved?.boss || "zakum",
+  boss: savedBoss,
   characters: [],
-  parties: saved?.parties || structuredClone(DEFAULT_PARTIES),
+  parties: Object.fromEntries(Object.keys(DEFAULT_PARTIES).map(boss => [boss, saved?.parties?.[boss] || [[]]])),
   search: "",
   collapsed: new Set(saved?.collapsed || []),
   drag: null
@@ -56,6 +57,8 @@ async function loadCharacters() {
   const nicknames = new Map((profiles || []).map(profile => [profile.user_id, profile.nickname]));
   state.characters = (rows || []).map(character => ({
     id: character.id,
+    userId: character.user_id,
+    isMine: character.user_id === currentUser.id,
     owner: nicknames.get(character.user_id) || "이름 미설정",
     className: character.class_name,
     role: character.role,
@@ -63,7 +66,7 @@ async function loadCharacters() {
     icon: character.role === "dps" ? "⚔" : "✦",
     color: character.role === "dps" ? "red" : "mint"
   }));
-  const validIds = new Set(state.characters.map(character => character.id));
+  const validIds = new Set(state.characters.filter(character => character.isMine).map(character => character.id));
   Object.values(state.parties).forEach(parties => parties.forEach(party => {
     for (let index = party.length - 1; index >= 0; index -= 1) if (!validIds.has(party[index])) party.splice(index, 1);
   }));
@@ -93,6 +96,8 @@ async function signOut() {
 }
 
 function moveCharacter(characterId, targetParty, targetSlot) {
+  const character = byId(characterId);
+  if (targetParty !== null && (!character || !character.isMine)) return showToast("본인 캐릭터만 파티에 편성할 수 있습니다.");
   const parties = state.parties[state.boss];
   parties.forEach(party => {
     const index = party.indexOf(characterId);
