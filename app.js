@@ -103,10 +103,27 @@ function subscribeToAssignments() {
   if (assignmentsChannel) return;
   assignmentsChannel = supabaseClient
     .channel("shared-party-assignments")
-    .on("postgres_changes", { event: "*", schema: "public", table: "party_assignments" }, () => loadAssignments())
+    .on("postgres_changes", { event: "*", schema: "public", table: "party_assignments" }, applyRealtimeAssignment)
     .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => loadCharacters())
     .on("postgres_changes", { event: "UPDATE", schema: "public", table: "characters" }, () => loadCharacters())
     .subscribe();
+}
+
+function applyRealtimeAssignment(payload) {
+  const assignment = payload.eventType === "DELETE" ? payload.old : payload.new;
+  const bossId = assignment?.boss_id;
+  const characterId = assignment?.character_id;
+  if (!bossId || !characterId || !state.parties[bossId]) return loadAssignments();
+
+  state.parties[bossId].forEach(party => {
+    const index = party.indexOf(characterId);
+    if (index >= 0) party.splice(index, 1);
+  });
+  if (payload.eventType !== "DELETE") {
+    const party = state.parties[bossId][assignment.party_index];
+    if (party && !party.includes(characterId)) party.push(characterId);
+  }
+  if (state.boss === bossId) renderAll();
 }
 
 async function signInWithGoogle() {
