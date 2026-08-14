@@ -135,10 +135,7 @@ async function moveCharacter(characterId, targetParty, targetSlot) {
   if (!canArrangeCharacter(character)) { showToast("본인 캐릭터만 파티에 편성할 수 있습니다."); return false; }
   if (character.dayOff) { showToast("금일 휴무 상태에서는 파티에 편성할 수 없습니다."); return false; }
   if (character.unavailable) { showToast("SOLD OUT 캐릭터는 파티에 편성할 수 없습니다."); return false; }
-  let error;
-  if (targetParty === null) {
-    ({ error } = await supabaseClient.from("party_assignments").delete().eq("boss_id", state.boss).eq("character_id", characterId));
-  } else {
+  if (targetParty !== null) {
     const target = state.parties[state.boss][targetParty];
     const alreadyInTarget = target.includes(characterId);
     if (!alreadyInTarget && target.length >= BOSS_CONFIGS[state.boss].maxMembers) { showToast("파티 정원이 가득 찼습니다."); return false; }
@@ -147,6 +144,20 @@ async function moveCharacter(characterId, targetParty, targetSlot) {
       const sameRoleCount = target.map(byId).filter(item => item?.role === character.role).length;
       if (sameRoleCount >= roleLimit) { showToast(character.role === "dps" ? "격수 줄이 가득 찼습니다." : "버프 줄이 가득 찼습니다."); return false; }
     }
+  }
+
+  const previousParties = structuredClone(state.parties[state.boss]);
+  state.parties[state.boss].forEach(party => {
+    const index = party.indexOf(characterId);
+    if (index >= 0) party.splice(index, 1);
+  });
+  if (targetParty !== null) state.parties[state.boss][targetParty].push(characterId);
+  renderAll();
+
+  let error;
+  if (targetParty === null) {
+    ({ error } = await supabaseClient.from("party_assignments").delete().eq("boss_id", state.boss).eq("character_id", characterId));
+  } else {
     ({ error } = await supabaseClient.from("party_assignments").upsert({
       boss_id: state.boss,
       character_id: characterId,
@@ -155,8 +166,12 @@ async function moveCharacter(characterId, targetParty, targetSlot) {
       updated_at: new Date().toISOString()
     }, { onConflict: "boss_id,character_id" }));
   }
-  if (error) { showToast(`파티 저장 오류: ${error.message}`); return false; }
-  await loadAssignments();
+  if (error) {
+    state.parties[state.boss] = previousParties;
+    renderAll();
+    showToast(`파티 저장 오류: ${error.message}`);
+    return false;
+  }
   return true;
 }
 
