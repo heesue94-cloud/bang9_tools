@@ -8,19 +8,17 @@ const savedBoss = BOSSES.some(boss => boss.id === saved?.boss) ? saved.boss : BO
 const state = {
   boss: savedBoss,
   characters: [],
-  parties: Object.fromEntries(Object.entries(BOSS_CONFIGS).map(([boss, config]) => {
-    const previous = saved?.parties?.[boss] || [];
-    return [boss, Array.from({ length: config.partyCount }, (_, index) => (previous[index] || []).slice(0, config.maxMembers))];
-  })),
+  parties: structuredClone(DEFAULT_PARTIES),
   search: "",
   collapsed: new Set(saved?.collapsed || []),
   drag: null
 };
 let currentUser = null;
 let currentNickname = "";
+let assignmentsChannel = null;
 
 function save() {
-  localStorage.setItem(storageKey, JSON.stringify({ boss: state.boss, parties: state.parties, collapsed: [...state.collapsed] }));
+  localStorage.setItem(storageKey, JSON.stringify({ boss: state.boss, collapsed: [...state.collapsed] }));
 }
 
 function showToast(message) {
@@ -48,6 +46,7 @@ async function updateAuthUI(session) {
   accountName.textContent = currentNickname || profile.full_name || profile.name || user.email?.split("@")[0] || "사용자";
   accountAvatar.src = profile.avatar_url || profile.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(accountName.textContent)}&background=7138d0&color=fff`;
   await loadCharacters();
+  subscribeToAssignments();
   if (!currentNickname) openNicknameDialog();
 }
 
@@ -69,12 +68,32 @@ async function loadCharacters() {
     icon: character.role === "dps" ? "⚔" : "✦",
     color: character.role === "dps" ? "red" : "mint"
   }));
-  const validIds = new Set(state.characters.filter(character => character.isMine).map(character => character.id));
-  Object.values(state.parties).forEach(parties => parties.forEach(party => {
-    for (let index = party.length - 1; index >= 0; index -= 1) if (!validIds.has(party[index])) party.splice(index, 1);
-  }));
-  save();
+  await loadAssignments();
+}
+
+async function loadAssignments() {
+  if (!currentUser) return;
+  const { data, error } = await supabaseClient
+    .from("party_assignments")
+    .select("boss_id,party_index,position,character_id")
+    .order("position", { ascending: true });
+  if (error) return showToast(`파티 조회 오류: ${error.message}`);
+  state.parties = structuredClone(DEFAULT_PARTIES);
+  const validIds = new Set(state.characters.map(character => character.id));
+  (data || []).forEach(assignment => {
+    const config = BOSS_CONFIGS[assignment.boss_id];
+    const party = state.parties[assignment.boss_id]?.[assignment.party_index];
+    if (config && party && validIds.has(assignment.character_id) && party.length < config.maxMembers) party.push(assignment.character_id);
+  });
   renderAll();
+}
+
+function subscribeToAssignments() {
+  if (assignmentsChannel) return;
+  assignmentsChannel = supabaseClient
+    .channel("shared-party-assignments")
+    .on("postgres_changes", { event: "*", schema: "public", table: "party_assignments" }, () => loadAssignments())
+    .subscribe();
 }
 
 async function signInWithGoogle() {
@@ -98,22 +117,26 @@ async function signOut() {
   showToast("로그아웃했습니다.");
 }
 
-function moveCharacter(characterId, targetParty, targetSlot) {
+async function moveCharacter(characterId, targetParty, targetSlot) {
   const character = byId(characterId);
-  if (targetParty !== null && (!character || !character.isMine)) return showToast("본인 캐릭터만 파티에 편성할 수 있습니다.");
-  const parties = state.parties[state.boss];
-  parties.forEach(party => {
-    const index = party.indexOf(characterId);
-    if (index >= 0) party.splice(index, 1);
-  });
-  if (targetParty !== null) {
-    const party = parties[targetParty];
-    party.splice(Math.min(targetSlot, party.length), 0, characterId);
-    const maxMembers = BOSS_CONFIGS[state.boss].maxMembers;
-    if (party.length > maxMembers) party.length = maxMembers;
+  if (!character?.isMine) return showToast("본인 캐릭터만 파티에 편성할 수 있습니다.");
+  let error;
+  if (targetParty === null) {
+    ({ error } = await supabaseClient.from("party_assignments").delete().eq("boss_id", state.boss).eq("character_id", characterId));
+  } else {
+    const target = state.parties[state.boss][targetParty];
+    const alreadyInTarget = target.includes(characterId);
+    if (!alreadyInTarget && target.length >= BOSS_CONFIGS[state.boss].maxMembers) return showToast("파티 정원이 가득 찼습니다.");
+    ({ error } = await supabaseClient.from("party_assignments").upsert({
+      boss_id: state.boss,
+      character_id: characterId,
+      party_index: targetParty,
+      position: targetSlot,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "boss_id,character_id" }));
   }
-  save();
-  renderAll();
+  if (error) return showToast(`파티 저장 오류: ${error.message}`);
+  await loadAssignments();
 }
 
 function bindDragAndDrop() {
