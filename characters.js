@@ -3,7 +3,11 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_xoKxUCjNPS2Zyk_szaHGWg_P2cF7nV5"
 );
 
-const roleNames = { dps: "격수", support: "서포터", tank: "탱커", buffer: "버퍼" };
+const roleNames = { dps: "격수", buffer: "버프" };
+const roleChoices = {
+  dps: ["닼나", "듀블", "아란", "보마", "나로", "혀로", "비숍"],
+  buffer: ["리프", "리저", "샤프", "분노", "연막", "뻥"]
+};
 let currentUser = null;
 let characters = [];
 
@@ -28,7 +32,7 @@ function renderProfile(user) {
 function renderCharacters() {
   characterTotal.textContent = characters.length;
   dealerTotal.textContent = characters.filter(character => character.role === "dps").length;
-  supportTotal.textContent = characters.filter(character => character.role !== "dps").length;
+  supportTotal.textContent = characters.filter(character => character.role === "buffer").length;
 
   if (!characters.length) {
     myRoster.innerHTML = `<div class="empty-roster"><span>✦</span><h2>등록한 캐릭터가 없습니다</h2><p>첫 캐릭터를 등록하고 파티를 구성해 보세요.</p><button class="button button-accent" data-new>＋ 새 캐릭터 등록</button></div>`;
@@ -36,13 +40,13 @@ function renderCharacters() {
   }
 
   myRoster.innerHTML = `<div class="roster-table">
-    <div class="roster-table-head"><span>캐릭터</span><span>직업</span><span>레벨</span><span>역할</span><span>전투력</span><span></span></div>
+    <div class="roster-table-head"><span>역할군</span><span>격수 / 버프</span><span>스공</span><span>등록일</span><span></span></div>
     ${characters.map(character => `<article class="roster-row">
-      <span class="character-name"><i>${escapeHTML(character.name.slice(0, 1))}</i><strong>${escapeHTML(character.name)}</strong></span>
-      <span>${escapeHTML(character.class_name)}</span><span>Lv.${character.level}</span>
       <span><b class="role role-${character.role}">${roleNames[character.role]}</b></span>
-      <span>${escapeHTML(character.power || "—")}</span>
-      <button class="delete-character" data-delete="${character.id}" aria-label="${escapeHTML(character.name)} 삭제">삭제</button>
+      <span class="character-name"><i>${escapeHTML(character.class_name.slice(0, 1))}</i><strong>${escapeHTML(character.class_name)}</strong></span>
+      <span>${character.role === "dps" ? escapeHTML(character.power || "—") : "—"}</span>
+      <span>${new Date(character.created_at).toLocaleDateString("ko-KR")}</span>
+      <button class="delete-character" data-delete="${character.id}" aria-label="${escapeHTML(character.class_name)} 삭제">삭제</button>
     </article>`).join("")}
   </div>`;
 }
@@ -66,12 +70,21 @@ async function initialize() {
   await loadCharacters();
 }
 
-function openDialog() { newCharacterForm.reset(); formError.textContent = ""; newCharacterDialog.showModal(); }
+function updateRoleFields() {
+  const role = roleGroup.value;
+  classChoice.innerHTML = roleChoices[role].map(choice => `<option value="${choice}">${choice}</option>`).join("");
+  powerField.hidden = role !== "dps";
+  newCharacterForm.elements.power.required = role === "dps";
+  if (role !== "dps") newCharacterForm.elements.power.value = "";
+}
+
+function openDialog() { newCharacterForm.reset(); updateRoleFields(); formError.textContent = ""; newCharacterDialog.showModal(); }
 function closeCharacterDialog() { newCharacterDialog.close(); }
 newCharacter.addEventListener("click", openDialog);
 myRoster.addEventListener("click", event => { if (event.target.closest("[data-new]")) openDialog(); });
 document.getElementById("closeDialog").addEventListener("click", closeCharacterDialog);
 cancelDialog.addEventListener("click", closeCharacterDialog);
+roleGroup.addEventListener("change", updateRoleFields);
 
 newCharacterForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -81,11 +94,11 @@ newCharacterForm.addEventListener("submit", async event => {
   const form = new FormData(newCharacterForm);
   const payload = {
     user_id: currentUser.id,
-    name: form.get("name").trim(),
-    class_name: form.get("className").trim(),
-    level: Number(form.get("level")),
+    name: null,
+    class_name: form.get("className"),
+    level: null,
     role: form.get("role"),
-    power: form.get("power").trim() || null
+    power: form.get("role") === "dps" ? form.get("power").trim() || null : null
   };
   const { error } = await supabaseClient.from("characters").insert(payload);
   saveCharacter.disabled = false;

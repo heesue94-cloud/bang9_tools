@@ -1,0 +1,11 @@
+.role-form-grid { grid-template-columns: 1fr 1fr; }
+.power-field[hidden] { display: none !important; }
+.roster-table-head,
+.roster-row { grid-template-columns: .8fr 1.2fr 1fr 1fr 55px; }
+
+@media (max-width: 760px) {
+  .role-form-grid { grid-template-columns: 1fr; }
+  .roster-table-head { display: none; }
+  .roster-row { grid-template-columns: 1fr 1fr; }
+  .roster-row .delete-character { grid-column: 2; justify-self: end; }
+}

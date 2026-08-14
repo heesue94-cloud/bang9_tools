@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="style.css?v=20260815-2">
   <link rel="stylesheet" href="auth.css?v=20260815-1">
   <link rel="stylesheet" href="characters.css?v=20260815-1">
+  <link rel="stylesheet" href="characters-v2.css?v=20260815-1">
 </head>
 <body>
   <header class="topbar">
@@ -34,7 +35,7 @@
     <section class="roster-summary">
       <div><strong id="characterTotal">0</strong><span>전체 캐릭터</span></div>
       <div><strong id="dealerTotal">0</strong><span>격수</span></div>
-      <div><strong id="supportTotal">0</strong><span>지원 역할</span></div>
+      <div><strong id="supportTotal">0</strong><span>버프</span></div>
     </section>
 
     <section class="my-roster" id="myRoster" aria-live="polite"></section>
@@ -43,12 +44,10 @@
   <dialog id="newCharacterDialog">
     <form id="newCharacterForm">
       <div class="dialog-title"><div><span class="eyebrow">NEW CHARACTER</span><h2>새 캐릭터 등록</h2></div><button class="icon-button" type="button" id="closeDialog" aria-label="닫기">×</button></div>
-      <div class="form-grid">
-        <label>캐릭터 이름<input name="name" required maxlength="20" placeholder="캐릭터 이름"></label>
-        <label>직업<input name="className" required maxlength="30" placeholder="예: 보우마스터"></label>
-        <label>레벨<input name="level" type="number" min="1" max="300" value="200" required></label>
-        <label>역할<select name="role"><option value="dps">격수</option><option value="support">서포터</option><option value="tank">탱커</option><option value="buffer">버퍼</option></select></label>
-        <label class="full-field">전투력<input name="power" maxlength="20" placeholder="예: 5,280만"></label>
+      <div class="form-grid role-form-grid">
+        <label>역할군<select name="role" id="roleGroup"><option value="dps">격수</option><option value="buffer">버프</option></select></label>
+        <label>격수 / 버프<select name="className" id="classChoice" required></select></label>
+        <label class="full-field power-field" id="powerField">스공<input name="power" maxlength="20" placeholder="예: 5,280만"></label>
       </div>
       <p class="form-error" id="formError"></p>
       <div class="dialog-actions"><button class="button button-muted" type="button" id="cancelDialog">취소</button><button class="button button-accent" type="submit" id="saveCharacter">등록하기</button></div>
@@ -57,6 +56,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="characters.js?v=20260815-2"></script>
+  <script src="characters.js?v=20260815-3"></script>
 </body>
 </html>
