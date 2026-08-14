@@ -11,12 +11,13 @@ function renderTabs() {
 
 function sidebarCard(character) {
   const assigned = state.parties[state.boss].flat().includes(character.id);
-  const locked = !character.isMine || character.dayOff;
-  const title = character.dayOff ? "금일 휴무인 캐릭터입니다" : locked ? "다른 사용자의 캐릭터는 편성할 수 없습니다" : "파티로 드래그하세요";
-  return `<article class="roster-card ${assigned ? "assigned" : ""} ${locked ? "locked" : ""} ${character.dayOff ? "day-off" : ""}" draggable="${!assigned && !locked}" data-character="${character.id}" title="${title}">
+  const locked = !character.isMine || character.dayOff || character.unavailable;
+  const title = character.dayOff ? "금일 휴무인 캐릭터입니다" : character.unavailable ? "다른 파티에 참여 중인 캐릭터입니다" : locked ? "다른 사용자의 캐릭터는 편성할 수 없습니다" : "파티로 드래그하세요";
+  return `<article class="roster-card ${assigned ? "assigned" : ""} ${locked ? "locked" : ""} ${character.dayOff ? "day-off" : ""} ${character.unavailable ? "sold-out" : ""}" draggable="${!assigned && !locked}" data-character="${character.id}" title="${title}">
     <span class="class-icon ${character.color}">${character.icon}</span>
     <span class="card-copy"><strong>${character.className}</strong><small>${character.role === "dps" ? `스공 ${character.power || "—"}` : "버프 캐릭터"}</small></span>
-    <span class="card-meta"><b class="role role-${character.role}">${roleLabel(character.role)}</b>${character.dayOff ? "<small>금일 휴무</small>" : locked ? "<small>열람만 가능</small>" : ""}</span>
+    <span class="card-meta"><b class="role role-${character.role}">${roleLabel(character.role)}</b>${character.dayOff ? "<small>금일 휴무</small>" : character.unavailable ? "<small>SOLD OUT</small>" : locked ? "<small>열람만 가능</small>" : ""}</span>
+    ${character.isMine ? `<button class="availability-toggle" data-availability="${character.id}" aria-label="${character.unavailable ? "사용 가능으로 복구" : "SOLD OUT 처리"}">${character.unavailable ? "+" : "−"}</button>` : ""}
   </article>`;
 }
 

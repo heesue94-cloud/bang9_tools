@@ -164,3 +164,11 @@
 .roster-card.day-off > span { opacity: .25; }
 .roster-card.day-off::before { content: ""; position: absolute; z-index: 4; left: -12%; top: 50%; width: 124%; height: 3px; background: #ff9f2f; box-shadow: 0 0 0 1px #70410d, 0 0 8px #ff9f2f88; transform: rotate(-12deg); pointer-events: none; }
 .roster-card.day-off::after { content: "휴무"; position: absolute; z-index: 5; right: 9px; top: 50%; padding: 2px 8px; border: 2px solid #ff9f2f; border-radius: 2px; color: #ffb347; background: #111a26e8; font-family: "Space Mono"; font-size: 9px; font-weight: 700; transform: translateY(-50%) rotate(-8deg); pointer-events: none; }
+.roster-card:has(.availability-toggle) { padding-right: 38px; }
+.availability-toggle { position: absolute; z-index: 8; right: 7px; top: 50%; width: 23px; height: 23px; border: 1px solid #74404a; border-radius: 5px; background: #3c2028; color: #ff6570; font-size: 16px; font-weight: 700; line-height: 19px; transform: translateY(-50%); cursor: pointer; }
+.availability-toggle:hover { border-color: #ff6570; background: #542630; }
+.roster-card.sold-out { position: relative; overflow: hidden; opacity: 1; }
+.roster-card.sold-out > span { opacity: .25; }
+.roster-card.sold-out::before { content: ""; position: absolute; z-index: 4; left: -12%; top: 50%; width: 124%; height: 3px; background: #ff3542; box-shadow: 0 0 0 1px #6d1118, 0 0 8px #ff354288; transform: rotate(-12deg); pointer-events: none; }
+.roster-card.sold-out::after { content: "SOLD OUT"; position: absolute; z-index: 5; right: 38px; top: 50%; padding: 2px 6px; border: 2px solid #ff3542; border-radius: 2px; color: #ff4d58; background: #111a26e8; font-family: "Space Mono"; font-size: 8px; font-weight: 700; letter-spacing: .8px; transform: translateY(-50%) rotate(-8deg); pointer-events: none; }
+.roster-card.sold-out .availability-toggle { border-color: #2e7158; background: #173c31; color: #52dca9; }
