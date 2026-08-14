@@ -17,6 +17,10 @@ let currentUser = null;
 let currentNickname = "";
 let assignmentsChannel = null;
 
+function canArrangeCharacter(character) {
+  return Boolean(character && (character.isMine || currentNickname === "방구"));
+}
+
 function save() {
   localStorage.setItem(storageKey, JSON.stringify({ boss: state.boss, collapsed: [...state.collapsed] }));
 }
@@ -128,7 +132,7 @@ async function signOut() {
 
 async function moveCharacter(characterId, targetParty, targetSlot) {
   const character = byId(characterId);
-  if (!character?.isMine) { showToast("본인 캐릭터만 파티에 편성할 수 있습니다."); return false; }
+  if (!canArrangeCharacter(character)) { showToast("본인 캐릭터만 파티에 편성할 수 있습니다."); return false; }
   if (character.dayOff) { showToast("금일 휴무 상태에서는 파티에 편성할 수 없습니다."); return false; }
   if (character.unavailable) { showToast("SOLD OUT 캐릭터는 파티에 편성할 수 없습니다."); return false; }
   let error;
@@ -182,7 +186,7 @@ function bindDragAndDrop() {
     card.addEventListener("dblclick", async event => {
       event.preventDefault();
       const character = byId(card.dataset.character);
-      if (!character?.isMine) return showToast("본인 캐릭터만 파티에서 뺄 수 있습니다.");
+      if (!canArrangeCharacter(character)) return showToast("본인 캐릭터만 파티에서 뺄 수 있습니다.");
       if (await moveCharacter(character.id, null, 0)) showToast("캐릭터를 목록으로 돌려보냈습니다.");
     });
   });

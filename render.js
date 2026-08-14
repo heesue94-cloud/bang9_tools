@@ -11,7 +11,8 @@ function renderTabs() {
 
 function sidebarCard(character) {
   const assigned = state.parties[state.boss].flat().includes(character.id);
-  const locked = !character.isMine || character.dayOff || character.unavailable;
+  const arrangeable = canArrangeCharacter(character);
+  const locked = !arrangeable || character.dayOff || character.unavailable;
   const title = character.dayOff ? "금일 휴무인 캐릭터입니다" : character.unavailable ? "다른 파티에 참여 중인 캐릭터입니다" : locked ? "다른 사용자의 캐릭터는 편성할 수 없습니다" : "파티로 드래그하세요";
   return `<article class="roster-card ${assigned ? "assigned" : ""} ${locked ? "locked" : ""} ${character.dayOff ? "day-off" : ""} ${character.unavailable ? "sold-out" : ""}" draggable="${!assigned && !locked}" data-character="${character.id}" title="${title}">
     <span class="class-icon ${character.color}">${character.icon}</span>
@@ -38,7 +39,7 @@ function renderSidebar() {
 
 function memberCard(character, partyIndex, slotIndex) {
   const ownerColor = /^#[0-9a-f]{6}$/i.test(character.ownerColor) ? character.ownerColor : "#12b95c";
-  return `<article class="member-card tint-${character.color}" draggable="true" data-character="${character.id}" data-party="${partyIndex}" data-slot="${slotIndex}" title="${character.isMine ? "더블클릭하면 목록으로 돌아갑니다" : "다른 사용자의 캐릭터입니다"}">
+  return `<article class="member-card tint-${character.color}" draggable="${canArrangeCharacter(character)}" data-character="${character.id}" data-party="${partyIndex}" data-slot="${slotIndex}" title="${canArrangeCharacter(character) ? "더블클릭하면 목록으로 돌아갑니다" : "다른 사용자의 캐릭터입니다"}">
     <span class="member-owner" style="background:${ownerColor}">${escapeHTML(character.owner)}</span>
     <span class="class-icon ${character.color}">${character.icon}</span>
     <strong>${character.className}</strong><small>${character.role === "dps" ? `스공 ${character.power || "—"}` : "버프"}</small>

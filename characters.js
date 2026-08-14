@@ -5,7 +5,7 @@ const supabaseClient = window.supabase.createClient(
 
 const roleNames = { dps: "격수", buffer: "버프" };
 const roleChoices = {
-  dps: ["닼나", "듀블", "아란", "보마", "나로", "혀로", "비숍"],
+  dps: ["닼나", "듀블", "아란", "보마", "나로", "혀로", "비숍", "캡틴"],
   buffer: ["리프", "리저", "샤프", "분노", "연막", "뻥"]
 };
 const profileColors = ["#ff4757", "#70a1ff", "#ffd166", "#45bf8a", "#d99cff", "#ff7f50", "#c7a7a0", "#f5f0e6", "#596275", "#8e63ce", "#83f28f", "#bdeff2", "#d65ac2", "#9aa0a6", "#7a3218", "#537083", "#a5ad20", "#30343b", "#b00020", "#fff8dc"];
