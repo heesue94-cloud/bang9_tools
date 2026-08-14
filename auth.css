@@ -39,3 +39,7 @@
   font-size: 14px;
   font-weight: 700;
 }
+
+#nicknameDialog form { min-width: min(420px, calc(100vw - 40px)); }
+#nicknameDialog label { display: grid; gap: 8px; color: #8296ad; }
+#nicknameDialog input { width: 100%; }

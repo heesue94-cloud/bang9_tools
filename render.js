@@ -1,4 +1,4 @@
-const roleLabel = role => ({ dps: "격수", support: "서포터", tank: "탱커", buffer: "버퍼" }[role] || role);
+const roleLabel = role => ({ dps: "격수", buffer: "버프" }[role] || role);
 const byId = id => state.characters.find(character => character.id === id);
 
 function renderTabs() {
@@ -12,8 +12,8 @@ function sidebarCard(character) {
   const assigned = state.parties[state.boss].flat().includes(character.id);
   return `<article class="roster-card ${assigned ? "assigned" : ""}" draggable="${!assigned}" data-character="${character.id}">
     <span class="class-icon ${character.color}">${character.icon}</span>
-    <span class="card-copy"><strong>${character.name}</strong><small>${character.className}</small></span>
-    <span class="card-meta"><b class="role role-${character.role}">${roleLabel(character.role)}</b><small>Lv.${character.level}</small></span>
+    <span class="card-copy"><strong>${character.className}</strong><small>${character.role === "dps" ? `스공 ${character.power || "—"}` : "버프 캐릭터"}</small></span>
+    <span class="card-meta"><b class="role role-${character.role}">${roleLabel(character.role)}</b></span>
   </article>`;
 }
 
@@ -22,7 +22,7 @@ function renderSidebar() {
   const owners = [...new Set(state.characters.map(character => character.owner))];
   characterGroups.innerHTML = owners.map(owner => {
     const characters = state.characters.filter(character => character.owner === owner &&
-      [character.name, character.className, character.role].some(value => value.toLowerCase().includes(query)));
+      [character.className, character.role, character.owner].some(value => value.toLowerCase().includes(query)));
     if (!characters.length && query) return "";
     const collapsed = state.collapsed.has(owner);
     return `<section class="owner-group">
@@ -35,7 +35,7 @@ function renderSidebar() {
 function memberCard(character, partyIndex, slotIndex) {
   return `<article class="member-card tint-${character.color}" draggable="true" data-character="${character.id}" data-party="${partyIndex}" data-slot="${slotIndex}">
     <span class="class-icon ${character.color}">${character.icon}</span>
-    <strong>${character.name}</strong><small>Lv.${character.level}</small>
+    <strong>${character.className}</strong><small>${character.role === "dps" ? `스공 ${character.power || "—"}` : "버프"}</small>
     <b class="role role-${character.role}">${roleLabel(character.role)}</b>
   </article>`;
 }
