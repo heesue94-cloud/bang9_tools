@@ -53,15 +53,16 @@ async function updateAuthUI(session) {
 async function loadCharacters() {
   const [{ data: rows, error }, { data: profiles }] = await Promise.all([
     supabaseClient.from("characters").select("id,user_id,class_name,role,power,created_at").order("created_at"),
-    supabaseClient.from("profiles").select("user_id,nickname")
+    supabaseClient.from("profiles").select("user_id,nickname,color")
   ]);
   if (error) return showToast(`캐릭터 조회 오류: ${error.message}`);
-  const nicknames = new Map((profiles || []).map(profile => [profile.user_id, profile.nickname]));
+  const profileMap = new Map((profiles || []).map(profile => [profile.user_id, profile]));
   state.characters = (rows || []).map(character => ({
     id: character.id,
     userId: character.user_id,
     isMine: character.user_id === currentUser.id,
-    owner: nicknames.get(character.user_id) || "이름 미설정",
+    owner: profileMap.get(character.user_id)?.nickname || "이름 미설정",
+    ownerColor: profileMap.get(character.user_id)?.color || "#12b95c",
     className: character.class_name,
     role: character.role,
     power: character.power,
