@@ -81,3 +81,21 @@
 .requirement-tag { padding: 3px 7px; border-radius: 3px; font-family: "Space Mono"; font-size: 8px; }
 .missing-tank { color: #ff6971; background: #4a222b; }
 .missing-sharp { color: #49e4ac; background: #123f35; }
+.member-card { position: relative; }
+.member-owner {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  max-width: calc(100% - 12px);
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #12b95c;
+  color: #fff;
+  font-family: "Space Mono";
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
