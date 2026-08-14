@@ -1,10 +1,79 @@
-<!DOCTYPE html><html lang="ko"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Maple Party Manager</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-</head><body>
-<header><div class="logo">🍁 Maple Party Manager</div></header>
-<main><aside id="sidebar"></aside><section id="partyArea"></section></main>
-<script src="data.js"></script><script src="render.js"></script><script src="app.js"></script>
-</body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1119">
+  <title>메이플 파티</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Maple Party 홈">
+      <span class="brand-mark">★</span><span>메이플 파티</span>
+    </a>
+    <div class="account">
+      <span class="account-name">개발자</span>
+      <button class="button button-muted" id="manageCharacters">캐릭터 관리</button>
+      <button class="icon-button" aria-label="설정">⚙</button>
+      <span class="avatar">D</span>
+    </div>
+  </header>
+
+  <nav class="boss-tabs" id="bossTabs" aria-label="보스 선택"></nav>
+
+  <main class="app-shell">
+    <aside class="character-panel">
+      <div class="panel-heading">
+        <h2>캐릭터 목록</h2>
+        <button class="add-icon" id="addCharacter" aria-label="캐릭터 추가">＋</button>
+      </div>
+      <label class="search-box">
+        <span>⌕</span>
+        <input id="characterSearch" type="search" placeholder="캐릭터 검색..." autocomplete="off">
+      </label>
+      <div id="characterGroups"></div>
+    </aside>
+
+    <section class="workspace">
+      <div class="workspace-header">
+        <div>
+          <h1><span class="boss-dot"></span><span id="bossName"></span></h1>
+          <p>보스 파티 구성</p>
+        </div>
+        <div class="workspace-actions">
+          <div class="summary" id="summary"></div>
+          <button class="button button-accent" id="addParty">＋ 파티 추가</button>
+        </div>
+      </div>
+      <div class="party-list" id="partyList"></div>
+    </section>
+  </main>
+
+  <dialog id="characterDialog">
+    <form method="dialog" id="characterForm">
+      <div class="dialog-title">
+        <div><span class="eyebrow">캐릭터 명단</span><h2>캐릭터 추가</h2></div>
+        <button class="icon-button" value="cancel" aria-label="닫기">×</button>
+      </div>
+      <div class="form-grid">
+        <label>소유자<input name="owner" required placeholder="개발자"></label>
+        <label>캐릭터 이름<input name="name" required placeholder="새로운영웅"></label>
+        <label>직업<input name="className" required placeholder="히어로"></label>
+        <label>레벨<input name="level" type="number" min="1" max="300" value="200" required></label>
+        <label>역할<select name="role"><option value="dps">격수</option><option value="support">서포터</option><option value="tank">탱커</option><option value="buffer">버퍼</option></select></label>
+        <label>전투력<input name="power" placeholder="5,280만"></label>
+      </div>
+      <div class="dialog-actions"><button class="button button-muted" value="cancel">취소</button><button class="button button-accent" value="default">캐릭터 추가</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="data.js"></script>
+  <script src="render.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

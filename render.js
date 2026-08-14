@@ -1,102 +1,76 @@
-function card(c,u){
+const roleLabel = role => ({ dps: "격수", support: "서포터", tank: "탱커", buffer: "버퍼" }[role] || role);
+const byId = id => state.characters.find(character => character.id === id);
 
-    return `
-    <div class="character-card ${c.role==="support" ? "support-card" : ""}"
-        data-owner="${c.owner}"
-        style="border-left:6px solid ${u.color}">
-
-        <div class="left">
-
-            <div class="topline">
-                <span class="name">
-                    ${c.job}${c.memo ? ` <small>${c.memo}</small>` : ""}
-                </span>
-            </div>
-
-            ${
-                c.role === "dealer"
-                ? `<div class="attack">${Number(c.attack).toFixed(2)}</div>`
-                : `<div class="attack support-text">버프</div>`
-            }
-
-        </div>
-
-        <span class="role">
-            ${c.role==="dealer" ? "격수" : "버프"}
-        </span>
-
-    </div>`;
+function renderTabs() {
+  bossTabs.innerHTML = BOSSES.map(boss => `
+    <button class="boss-tab ${boss.id === state.boss ? "active" : ""}" data-boss="${boss.id}">
+      <span></span>${boss.name}
+    </button>`).join("") + `<span class="party-count">♧ 파티 ${state.parties[state.boss].length}개</span>`;
 }
 
-
-
-function renderSidebar(){
-
-    const sidebar=document.getElementById("sidebar");
-
-    let html="";
-
-    USERS.forEach(u=>{
-
-        html+=`
-        <div class="user">
-
-            <div class="user-title">
-                ▼ ${u.name}
-            </div>
-
-            <div class="character-list shared"
-                 data-owner="${u.characters[0].owner}">
-        `;
-
-        u.characters.forEach(c=>{
-
-            html+=card(c,u);
-
-        });
-
-        html+=`
-            </div>
-
-        </div>
-        `;
-
-    });
-
-    sidebar.innerHTML=html;
-
+function sidebarCard(character) {
+  const assigned = state.parties[state.boss].flat().includes(character.id);
+  return `<article class="roster-card ${assigned ? "assigned" : ""}" draggable="${!assigned}" data-character="${character.id}">
+    <span class="class-icon ${character.color}">${character.icon}</span>
+    <span class="card-copy"><strong>${character.name}</strong><small>${character.className}</small></span>
+    <span class="card-meta"><b class="role role-${character.role}">${roleLabel(character.role)}</b><small>Lv.${character.level}</small></span>
+  </article>`;
 }
 
+function renderSidebar() {
+  const query = state.search.trim().toLowerCase();
+  const owners = [...new Set(state.characters.map(character => character.owner))];
+  characterGroups.innerHTML = owners.map(owner => {
+    const characters = state.characters.filter(character => character.owner === owner &&
+      [character.name, character.className, character.role].some(value => value.toLowerCase().includes(query)));
+    if (!characters.length && query) return "";
+    const collapsed = state.collapsed.has(owner);
+    return `<section class="owner-group">
+      <button class="owner-heading" data-owner="${owner}"><span class="chevron ${collapsed ? "" : "open"}">›</span>${owner}<b>${characters.length}</b></button>
+      <div class="owner-characters ${collapsed ? "collapsed" : ""}">${characters.map(sidebarCard).join("")}</div>
+    </section>`;
+  }).join("");
+}
 
+function memberCard(character, partyIndex, slotIndex) {
+  return `<article class="member-card tint-${character.color}" draggable="true" data-character="${character.id}" data-party="${partyIndex}" data-slot="${slotIndex}">
+    <span class="class-icon ${character.color}">${character.icon}</span>
+    <strong>${character.name}</strong><small>Lv.${character.level}</small>
+    <b class="role role-${character.role}">${roleLabel(character.role)}</b>
+  </article>`;
+}
 
-function renderParty(){
+function emptySlot(partyIndex, slotIndex) {
+  return `<div class="empty-slot" data-party="${partyIndex}" data-slot="${slotIndex}"><span>캐릭터를 여기에 놓으세요</span></div>`;
+}
 
-    const partyArea=document.getElementById("partyArea");
+function renderParties() {
+  const boss = BOSSES.find(item => item.id === state.boss);
+  bossName.textContent = boss.name;
+  const parties = state.parties[state.boss];
+  partyList.innerHTML = parties.map((members, partyIndex) => {
+    const counts = members.map(byId).filter(Boolean).reduce((all, character) => ({ ...all, [character.role]: (all[character.role] || 0) + 1 }), {});
+    const badges = Object.entries(counts).map(([role, count]) => `<b class="mini-role role-${role}">${roleLabel(role)[0]}${count}</b>`).join("");
+    const slots = Array.from({ length: 6 }, (_, slotIndex) => members[slotIndex] ? memberCard(byId(members[slotIndex]), partyIndex, slotIndex) : emptySlot(partyIndex, slotIndex)).join("");
+    return `<section class="party-card" data-party-card="${partyIndex}">
+      <header class="party-header"><div><strong>파티 ${partyIndex + 1}</strong><span class="member-count">${members.length} / 6명</span>${badges}</div>
+      <div><button class="party-menu" aria-label="파티 메뉴">•••</button><button class="delete-party" data-delete="${partyIndex}" aria-label="파티 삭제">♧</button></div></header>
+      <div class="slots">${slots}</div>
+    </section>`;
+  }).join("");
+  renderSummary();
+}
 
-    let html='<div class="party-grid">';
+function renderSummary() {
+  const assigned = new Set(state.parties[state.boss].flat()).size;
+  summary.innerHTML = [
+    [state.characters.length, "전체"], [assigned, "배정"], [state.characters.length - assigned, "미배정"]
+  ].map(([value, label]) => `<div><strong>${value}</strong><span>${label}</span></div>`).join("");
+}
 
-    for(let i=1;i<=5;i++){
-
-        html+=`
-        <div class="party">
-
-            <div class="party-title">
-                <span>${i}파티</span>
-
-                <button class="reset-party">
-                    초기화
-                </button>
-            </div>
-
-            <div class="party-body shared"></div>
-
-        </div>
-        `;
-
-    }
-
-    html+='</div>';
-
-    partyArea.innerHTML=html;
-
+function renderAll() {
+  renderTabs();
+  renderSidebar();
+  renderParties();
+  bindDragAndDrop();
 }

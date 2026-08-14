@@ -1,69 +1,28 @@
-const USERS=[
-{
-    name:"방구",
-    color:"#ef4444",
-    characters:[
-        {owner:"bang9",job:"보마",role:"dealer",attack:1.31},
-        {owner:"bang9",job:"보마",role:"dealer",attack:1.05},
-        {owner:"bang9",job:"듀블",role:"dealer",attack:1.45},
-
-        {owner:"bang9",job:"리저",role:"support"},
-        {owner:"bang9",job:"연막",role:"support"}
-    ]
-},
-
-{
-    name:"라썸",
-    color:"#8b5cf6",
-    characters:[
-        {owner:"lassom",job:"아란",role:"dealer",attack:1.52,memo:"메2"},
-        {owner:"lassom",job:"보마",role:"dealer",attack:1.32},
-        {owner:"lassom",job:"캡틴",role:"dealer",attack:0.95},
-
-        {owner:"lassom",job:"분노",role:"support"},
-        {owner:"lassom",job:"예비샤프",role:"support"},
-        {owner:"lassom",job:"윈리혹",role:"support"}
-    ]
-},
-
-
-{
-    name:"승현",
-    color:"#22c55e",
-    characters:[
-        {owner:"seunghyun",job:"듀블",role:"dealer",attack:1.50,memo:"메2"},
-        {owner:"seunghyun",job:"듀블",role:"dealer",attack:1.50,memo:"메2"},
-        {owner:"seunghyun",job:"나로",role:"dealer",attack:0.80},
-
-        {owner:"seunghyun",job:"연막",role:"support"},
-        {owner:"seunghyun",job:"리프",role:"support"}
-    ]
-},
-
-{
-    name:"쫀쿠",
-    color:"#f59e0b",
-    characters:[
-        {owner:"zzonkku",job:"아란",role:"dealer",attack:1.81},
-        {owner:"zzonkku",job:"닼나",role:"dealer",attack:1.72},
-        {owner:"zzonkku",job:"아란",role:"dealer",attack:1.53},
-        {owner:"zzonkku",job:"듀블",role:"dealer",attack:1.46},
-
-        {owner:"zzonkku",job:"맆혹",role:"support"},
-        {owner:"zzonkku",job:"리저",role:"support"},
-        {owner:"zzonkku",job:"리저",role:"support"}
-    ]
-}
-
-
-{
-    name:"강정",
-    color:"#f59e0b",
-    characters:[
-        {owner:"gangjeong",job:"혀로",role:"dealer",attack:1.28},
-        {owner:"gangjeong",job:"피작숍",role:"dealer",attack:0.0},
-
-        {owner:"gangjeong",job:"맆혹",role:"support"},
-    ]
-}    
+const BOSSES = [
+  { id: "zakum", name: "자쿰" },
+  { id: "horntail", name: "혼테일" },
+  { id: "ephenia", name: "에피네아" },
+  { id: "papulatus", name: "파풀라투스" }
 ];
+
+const CHARACTERS = [
+  { id: "bowmaster", owner: "개발자", name: "Bowmaster", className: "보우마스터", level: 200, role: "dps", power: "5,280만", icon: "◎", color: "cyan" },
+  { id: "holybishop", owner: "개발자", name: "HolyBishop", className: "비숍", level: 190, role: "support", power: "4,120만", icon: "♡", color: "pink" },
+  { id: "arcticzap", owner: "개발자", name: "ArcticZap", className: "아크메이지(썬·콜)", level: 195, role: "dps", power: "4,870만", icon: "ϟ", color: "blue" },
+  { id: "legendhero", owner: "플레이어123", name: "LegendHero", className: "히어로", level: 200, role: "dps", power: "6,130만", icon: "♢", color: "orange" },
+  { id: "darkvengeance", owner: "플레이어123", name: "DarkVengeance", className: "다크나이트", level: 185, role: "tank", power: "4,510만", icon: "♢", color: "orange" },
+  { id: "shadowstep", owner: "플레이어123", name: "ShadowStep", className: "나이트로드", level: 193, role: "dps", power: "5,040만", icon: "⇄", color: "lime" },
+  { id: "battlemage", owner: "메이플유저", name: "BattleMageX", className: "배틀메이지", level: 182, role: "buffer", power: "3,960만", icon: "ϟ", color: "violet" },
+  { id: "windwalker", owner: "메이플유저", name: "WindWalker", className: "윈드브레이커", level: 188, role: "dps", power: "4,490만", icon: "➶", color: "mint" },
+  { id: "paladin", owner: "메이플유저", name: "IronPaladin", className: "팔라딘", level: 197, role: "tank", power: "5,570만", icon: "◇", color: "gold" },
+  { id: "nightbloom", owner: "메이플길드", name: "NightBloom", className: "섀도어", level: 186, role: "dps", power: "4,330만", icon: "✦", color: "violet" },
+  { id: "spiritlink", owner: "메이플길드", name: "SpiritLink", className: "칸나", level: 180, role: "support", power: "3,710만", icon: "✣", color: "pink" },
+  { id: "cannonfire", owner: "메이플길드", name: "CannonFire", className: "캐논슈터", level: 191, role: "dps", power: "4,980만", icon: "●", color: "red" }
+];
+
+const DEFAULT_PARTIES = {
+  zakum: [["bowmaster", "holybishop", "legendhero", "arcticzap"], ["darkvengeance", "battlemage"]],
+  horntail: [["paladin", "windwalker", "spiritlink"]],
+  ephenia: [[]],
+  papulatus: [[]]
+};
