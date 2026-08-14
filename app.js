@@ -128,16 +128,16 @@ async function signOut() {
 
 async function moveCharacter(characterId, targetParty, targetSlot) {
   const character = byId(characterId);
-  if (!character?.isMine) return showToast("본인 캐릭터만 파티에 편성할 수 있습니다.");
-  if (character.dayOff) return showToast("금일 휴무 상태에서는 파티에 편성할 수 없습니다.");
-  if (character.unavailable) return showToast("SOLD OUT 캐릭터는 파티에 편성할 수 없습니다.");
+  if (!character?.isMine) { showToast("본인 캐릭터만 파티에 편성할 수 있습니다."); return false; }
+  if (character.dayOff) { showToast("금일 휴무 상태에서는 파티에 편성할 수 없습니다."); return false; }
+  if (character.unavailable) { showToast("SOLD OUT 캐릭터는 파티에 편성할 수 없습니다."); return false; }
   let error;
   if (targetParty === null) {
     ({ error } = await supabaseClient.from("party_assignments").delete().eq("boss_id", state.boss).eq("character_id", characterId));
   } else {
     const target = state.parties[state.boss][targetParty];
     const alreadyInTarget = target.includes(characterId);
-    if (!alreadyInTarget && target.length >= BOSS_CONFIGS[state.boss].maxMembers) return showToast("파티 정원이 가득 찼습니다.");
+    if (!alreadyInTarget && target.length >= BOSS_CONFIGS[state.boss].maxMembers) { showToast("파티 정원이 가득 찼습니다."); return false; }
     ({ error } = await supabaseClient.from("party_assignments").upsert({
       boss_id: state.boss,
       character_id: characterId,
@@ -146,8 +146,9 @@ async function moveCharacter(characterId, targetParty, targetSlot) {
       updated_at: new Date().toISOString()
     }, { onConflict: "boss_id,character_id" }));
   }
-  if (error) return showToast(`파티 저장 오류: ${error.message}`);
+  if (error) { showToast(`파티 저장 오류: ${error.message}`); return false; }
   await loadAssignments();
+  return true;
 }
 
 function bindDragAndDrop() {
@@ -171,6 +172,14 @@ function bindDragAndDrop() {
       event.preventDefault();
       const id = event.dataTransfer.getData("text/plain") || state.drag;
       if (id) moveCharacter(id, Number(slot.dataset.party), Number(slot.dataset.slot));
+    });
+  });
+  document.querySelectorAll(".member-card[data-character]").forEach(card => {
+    card.addEventListener("dblclick", async event => {
+      event.preventDefault();
+      const character = byId(card.dataset.character);
+      if (!character?.isMine) return showToast("본인 캐릭터만 파티에서 뺄 수 있습니다.");
+      if (await moveCharacter(character.id, null, 0)) showToast("캐릭터를 목록으로 돌려보냈습니다.");
     });
   });
 }
