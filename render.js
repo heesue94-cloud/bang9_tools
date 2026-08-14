@@ -10,10 +10,11 @@ function renderTabs() {
 
 function sidebarCard(character) {
   const assigned = state.parties[state.boss].flat().includes(character.id);
-  return `<article class="roster-card ${assigned ? "assigned" : ""}" draggable="${!assigned}" data-character="${character.id}">
+  const locked = !character.isMine;
+  return `<article class="roster-card ${assigned ? "assigned" : ""} ${locked ? "locked" : ""}" draggable="${!assigned && !locked}" data-character="${character.id}" title="${locked ? "다른 사용자의 캐릭터는 편성할 수 없습니다" : "파티로 드래그하세요"}">
     <span class="class-icon ${character.color}">${character.icon}</span>
     <span class="card-copy"><strong>${character.className}</strong><small>${character.role === "dps" ? `스공 ${character.power || "—"}` : "버프 캐릭터"}</small></span>
-    <span class="card-meta"><b class="role role-${character.role}">${roleLabel(character.role)}</b></span>
+    <span class="card-meta"><b class="role role-${character.role}">${roleLabel(character.role)}</b>${locked ? "<small>열람만 가능</small>" : ""}</span>
   </article>`;
 }
 

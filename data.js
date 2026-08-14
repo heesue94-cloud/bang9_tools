@@ -1,13 +1,11 @@
 const BOSSES = [
-  { id: "zakum", name: "자쿰" },
-  { id: "horntail", name: "혼테일" },
+  { id: "horntail-normal", name: "혼테일-일반" },
   { id: "ephenia", name: "에피네아" },
-  { id: "papulatus", name: "파풀라투스" }
+  { id: "chaos-balrog", name: "카오스 발록" }
 ];
 
 const DEFAULT_PARTIES = {
-  zakum: [[]],
-  horntail: [[]],
+  "horntail-normal": [[]],
   ephenia: [[]],
-  papulatus: [[]]
+  "chaos-balrog": [[]]
 };
