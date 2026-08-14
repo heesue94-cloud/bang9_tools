@@ -5,9 +5,9 @@ const BOSSES = [
 ];
 
 const BOSS_CONFIGS = {
-  "horntail-normal": { partyCount: 4, maxMembers: 12 },
+  "horntail-normal": { partyCount: 4, maxMembers: 78, maxDps: 6, maxBuffers: 72 },
   ephenia: { partyCount: 10, maxMembers: 6 },
-  "chaos-balrog": { partyCount: 4, maxMembers: 12 }
+  "chaos-balrog": { partyCount: 4, maxMembers: 12, maxDps: 6, maxBuffers: 6 }
 };
 
 const DEFAULT_PARTIES = Object.fromEntries(

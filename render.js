@@ -37,9 +37,9 @@ function renderSidebar() {
   }).join("");
 }
 
-function memberCard(character, partyIndex, slotIndex) {
+function memberCard(character, partyIndex, slotIndex, compact = false) {
   const ownerColor = /^#[0-9a-f]{6}$/i.test(character.ownerColor) ? character.ownerColor : "#12b95c";
-  return `<article class="member-card tint-${character.color}" draggable="${canArrangeCharacter(character)}" data-character="${character.id}" data-party="${partyIndex}" data-slot="${slotIndex}" title="${canArrangeCharacter(character) ? "더블클릭하면 목록으로 돌아갑니다" : "다른 사용자의 캐릭터입니다"}">
+  return `<article class="member-card tint-${character.color} ${compact ? "buffer-compact" : ""}" draggable="${canArrangeCharacter(character)}" data-character="${character.id}" data-party="${partyIndex}" data-slot="${slotIndex}" title="${canArrangeCharacter(character) ? "더블클릭하면 목록으로 돌아갑니다" : "다른 사용자의 캐릭터입니다"}">
     <span class="member-owner" style="background:${ownerColor}">${escapeHTML(character.owner)}</span>
     <span class="class-icon ${character.color}">${character.icon}</span>
     <strong>${character.className}</strong><small>${character.role === "dps" ? `스공 ${character.power || "—"}` : "버프"}</small>
@@ -47,12 +47,39 @@ function memberCard(character, partyIndex, slotIndex) {
   </article>`;
 }
 
-function emptySlot(partyIndex, slotIndex, expectedRole = null) {
+function emptySlot(partyIndex, slotIndex, expectedRole = null, compact = false) {
   const label = expectedRole === "dps" ? "격수를 여기에 놓으세요" : expectedRole === "buffer" ? "버프를 여기에 놓으세요" : "캐릭터를 여기에 놓으세요";
-  return `<div class="empty-slot" data-party="${partyIndex}" data-slot="${slotIndex}"><span>${label}</span></div>`;
+  return `<div class="empty-slot ${compact ? "buffer-compact" : ""}" data-party="${partyIndex}" data-slot="${slotIndex}"><span>${compact ? "버프" : label}</span></div>`;
 }
 
-function arrangePartySlots(partyCharacters, maxMembers) {
+function arrangePartySlots(partyCharacters, maxMembers, bossId) {
+  if (bossId === "horntail-normal") {
+    const dealers = partyCharacters.filter(character => character.role === "dps").slice(0, 6);
+    const buffers = partyCharacters.filter(character => character.role === "buffer").slice(0, 72);
+    const bufferSlots = Array(72).fill(null);
+    const usedBuffers = new Set();
+    dealers.forEach((dealer, dealerIndex) => {
+      const matches = buffers.map((buffer, index) => ({ buffer, index }))
+        .filter(item => item.buffer.userId === dealer.userId);
+      matches.forEach((item, matchIndex) => {
+        const row = Math.floor(matchIndex / 3);
+        const column = dealerIndex * 3 + (matchIndex % 3);
+        if (row < 4) {
+          bufferSlots[row * 18 + column] = item.buffer;
+          usedBuffers.add(item.index);
+        }
+      });
+    });
+    buffers.forEach((buffer, index) => {
+      if (usedBuffers.has(index)) return;
+      const emptyIndex = bufferSlots.findIndex(item => !item);
+      if (emptyIndex >= 0) bufferSlots[emptyIndex] = buffer;
+    });
+    return [
+      ...Array.from({ length: 6 }, (_, index) => ({ character: dealers[index] || null, role: "dps", compact: false })),
+      ...bufferSlots.map(character => ({ character, role: "buffer", compact: true }))
+    ];
+  }
   if (maxMembers !== 12) return Array.from({ length: maxMembers }, (_, index) => ({ character: partyCharacters[index] || null, role: null }));
   const dealers = partyCharacters.filter(character => character.role === "dps");
   const buffers = partyCharacters.filter(character => character.role === "buffer");
@@ -91,12 +118,12 @@ function renderParties() {
     const tankReady = ["아란", "닼나", "뻥"].some(name => classNames.has(name));
     const sharpReady = ["보마", "샤프"].some(name => classNames.has(name));
     const requirements = `${tankReady ? "" : '<b class="requirement-tag missing-tank">콤베없음</b><b class="requirement-tag missing-tank">피뻥없음</b>'}${sharpReady ? "" : '<b class="requirement-tag missing-sharp">샤프없음</b>'}`;
-    const arrangedSlots = arrangePartySlots(partyCharacters, config.maxMembers);
-    const slots = arrangedSlots.map((slot, slotIndex) => slot.character ? memberCard(slot.character, partyIndex, slotIndex) : emptySlot(partyIndex, slotIndex, slot.role)).join("");
+    const arrangedSlots = arrangePartySlots(partyCharacters, config.maxMembers, state.boss);
+    const slots = arrangedSlots.map((slot, slotIndex) => slot.character ? memberCard(slot.character, partyIndex, slotIndex, slot.compact) : emptySlot(partyIndex, slotIndex, slot.role, slot.compact)).join("");
     return `<section class="party-card" data-party-card="${partyIndex}">
       <header class="party-header"><div><strong>파티 ${partyIndex + 1}</strong><span class="participant-count">${participantCount}인 파티</span><span class="member-count">${members.length} / ${config.maxMembers}캐릭터</span>${badges}</div>
       <div class="party-requirements">${requirements}</div></header>
-      <div class="slots">${slots}</div>
+      <div class="slots ${state.boss === "horntail-normal" ? "horntail-slots" : ""}">${slots}</div>
     </section>`;
   }).join("");
   renderSummary();

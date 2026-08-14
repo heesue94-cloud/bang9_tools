@@ -142,9 +142,10 @@ async function moveCharacter(characterId, targetParty, targetSlot) {
     const target = state.parties[state.boss][targetParty];
     const alreadyInTarget = target.includes(characterId);
     if (!alreadyInTarget && target.length >= BOSS_CONFIGS[state.boss].maxMembers) { showToast("파티 정원이 가득 찼습니다."); return false; }
-    if (!alreadyInTarget && BOSS_CONFIGS[state.boss].maxMembers === 12) {
+    const roleLimit = character.role === "dps" ? BOSS_CONFIGS[state.boss].maxDps : BOSS_CONFIGS[state.boss].maxBuffers;
+    if (!alreadyInTarget && roleLimit) {
       const sameRoleCount = target.map(byId).filter(item => item?.role === character.role).length;
-      if (sameRoleCount >= 6) { showToast(character.role === "dps" ? "격수 줄이 가득 찼습니다." : "버프 줄이 가득 찼습니다."); return false; }
+      if (sameRoleCount >= roleLimit) { showToast(character.role === "dps" ? "격수 줄이 가득 찼습니다." : "버프 줄이 가득 찼습니다."); return false; }
     }
     ({ error } = await supabaseClient.from("party_assignments").upsert({
       boss_id: state.boss,
