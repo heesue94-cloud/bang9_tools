@@ -199,7 +199,7 @@ nicknameForm.addEventListener("submit", async event => {
   currentNickname = nickname;
   accountName.textContent = nickname;
   closeNicknameDialog();
-  showToast("별명을 저장했습니다.");
+  showToast("닉네임을 저장했습니다.");
   await loadCharacters();
 });
 

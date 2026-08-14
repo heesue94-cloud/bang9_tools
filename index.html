@@ -20,7 +20,7 @@
       <button class="button google-login" id="googleLogin"><span class="google-mark">G</span>Google로 로그인</button>
       <div class="auth-user" id="authUser" hidden>
         <span class="account-name" id="accountName"></span>
-        <button class="button button-muted" id="editNickname">별명 설정</button>
+        <button class="button button-muted" id="editNickname">닉네임 설정</button>
         <button class="button button-muted" id="manageCharacters">캐릭터 관리</button>
         <button class="icon-button" id="logoutButton" aria-label="로그아웃" title="로그아웃">↪</button>
         <img class="avatar" id="accountAvatar" alt="프로필">
@@ -60,8 +60,8 @@
 
   <dialog id="nicknameDialog">
     <form id="nicknameForm">
-      <div class="dialog-title"><div><span class="eyebrow">MY PROFILE</span><h2>사이트 별명 설정</h2></div><button class="icon-button" type="button" id="closeNickname" aria-label="닫기">×</button></div>
-      <label>별명<input name="nickname" id="nicknameInput" required maxlength="16" placeholder="사용할 별명"></label>
+      <div class="dialog-title"><div><span class="eyebrow">MY PROFILE</span><h2>인게임 닉네임 설정</h2></div><button class="icon-button" type="button" id="closeNickname" aria-label="닫기">×</button></div>
+      <label>닉네임<input name="nickname" id="nicknameInput" required maxlength="16" placeholder="인게임 닉네임"></label>
       <p class="form-error" id="nicknameError"></p>
       <div class="dialog-actions"><button class="button button-muted" type="button" id="cancelNickname">취소</button><button class="button button-accent" type="submit" id="saveNickname">저장하기</button></div>
     </form>
@@ -71,6 +71,6 @@
   <script src="data.js?v=20260815-3"></script>
   <script src="render.js?v=20260815-3"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260815-6"></script>
+  <script src="app.js?v=20260815-7"></script>
 </body>
 </html>
