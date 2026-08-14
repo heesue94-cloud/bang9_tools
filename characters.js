@@ -54,7 +54,11 @@ function renderCharacters() {
 
 async function loadCharacters() {
   myRoster.innerHTML = `<div class="loading-roster">캐릭터 목록을 불러오는 중...</div>`;
-  const { data, error } = await supabaseClient.from("characters").select("*").order("created_at", { ascending: true });
+  const { data, error } = await supabaseClient
+    .from("characters")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .order("created_at", { ascending: true });
   if (error) {
     myRoster.innerHTML = `<div class="empty-roster error"><h2>목록을 불러오지 못했습니다</h2><p>${escapeHTML(error.message)}</p></div>`;
     return;
