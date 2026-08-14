@@ -11,11 +11,12 @@ function renderTabs() {
 
 function sidebarCard(character) {
   const assigned = state.parties[state.boss].flat().includes(character.id);
-  const locked = !character.isMine;
-  return `<article class="roster-card ${assigned ? "assigned" : ""} ${locked ? "locked" : ""}" draggable="${!assigned && !locked}" data-character="${character.id}" title="${locked ? "다른 사용자의 캐릭터는 편성할 수 없습니다" : "파티로 드래그하세요"}">
+  const locked = !character.isMine || character.dayOff;
+  const title = character.dayOff ? "금일 휴무인 캐릭터입니다" : locked ? "다른 사용자의 캐릭터는 편성할 수 없습니다" : "파티로 드래그하세요";
+  return `<article class="roster-card ${assigned ? "assigned" : ""} ${locked ? "locked" : ""} ${character.dayOff ? "day-off" : ""}" draggable="${!assigned && !locked}" data-character="${character.id}" title="${title}">
     <span class="class-icon ${character.color}">${character.icon}</span>
     <span class="card-copy"><strong>${character.className}</strong><small>${character.role === "dps" ? `스공 ${character.power || "—"}` : "버프 캐릭터"}</small></span>
-    <span class="card-meta"><b class="role role-${character.role}">${roleLabel(character.role)}</b>${locked ? "<small>열람만 가능</small>" : ""}</span>
+    <span class="card-meta"><b class="role role-${character.role}">${roleLabel(character.role)}</b>${character.dayOff ? "<small>금일 휴무</small>" : locked ? "<small>열람만 가능</small>" : ""}</span>
   </article>`;
 }
 
@@ -55,6 +56,7 @@ function renderParties() {
   const parties = state.parties[state.boss];
   partyList.innerHTML = parties.map((members, partyIndex) => {
     const partyCharacters = members.map(byId).filter(Boolean);
+    const participantCount = new Set(partyCharacters.map(character => character.userId)).size;
     const counts = members.map(byId).filter(Boolean).reduce((all, character) => ({ ...all, [character.role]: (all[character.role] || 0) + 1 }), {});
     const badges = Object.entries(counts).map(([role, count]) => `<b class="mini-role role-${role}">${roleLabel(role)[0]}${count}</b>`).join("");
     const classNames = new Set(partyCharacters.map(character => character.className));
@@ -63,7 +65,7 @@ function renderParties() {
     const requirements = `${tankReady ? "" : '<b class="requirement-tag missing-tank">콤베없음</b><b class="requirement-tag missing-tank">피뻥없음</b>'}${sharpReady ? "" : '<b class="requirement-tag missing-sharp">샤프없음</b>'}`;
     const slots = Array.from({ length: config.maxMembers }, (_, slotIndex) => members[slotIndex] ? memberCard(byId(members[slotIndex]), partyIndex, slotIndex) : emptySlot(partyIndex, slotIndex)).join("");
     return `<section class="party-card" data-party-card="${partyIndex}">
-      <header class="party-header"><div><strong>파티 ${partyIndex + 1}</strong><span class="member-count">${members.length} / ${config.maxMembers}명</span>${badges}</div>
+      <header class="party-header"><div><strong>파티 ${partyIndex + 1}</strong><span class="participant-count">${participantCount}인 파티</span><span class="member-count">${members.length} / ${config.maxMembers}캐릭터</span>${badges}</div>
       <div class="party-requirements">${requirements}</div></header>
       <div class="slots">${slots}</div>
     </section>`;

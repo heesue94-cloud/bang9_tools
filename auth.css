@@ -157,3 +157,10 @@
 .card-copy small,
 .member-card small { color: #93abc4; }
 .owner-heading b { color: #b7cae0; }
+.day-off-toggle { display: flex; align-items: center; gap: 6px; color: #f5c56b; font-size: 12px; white-space: nowrap; cursor: pointer; }
+.day-off-toggle input { width: 15px; height: 15px; accent-color: #ff9f2f; cursor: pointer; }
+.participant-count { padding: 4px 9px; border-radius: 12px; background: #173a31; color: #55e0ad; font-family: "Space Mono"; font-size: 10px; font-weight: 700; letter-spacing: .3px; }
+.roster-card.day-off { position: relative; overflow: hidden; opacity: 1; }
+.roster-card.day-off > span { opacity: .25; }
+.roster-card.day-off::before { content: ""; position: absolute; z-index: 4; left: -12%; top: 50%; width: 124%; height: 3px; background: #ff9f2f; box-shadow: 0 0 0 1px #70410d, 0 0 8px #ff9f2f88; transform: rotate(-12deg); pointer-events: none; }
+.roster-card.day-off::after { content: "휴무"; position: absolute; z-index: 5; right: 9px; top: 50%; padding: 2px 8px; border: 2px solid #ff9f2f; border-radius: 2px; color: #ffb347; background: #111a26e8; font-family: "Space Mono"; font-size: 9px; font-weight: 700; transform: translateY(-50%) rotate(-8deg); pointer-events: none; }
