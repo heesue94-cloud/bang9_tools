@@ -9,6 +9,7 @@ const state = {
   boss: savedBoss,
   characters: [],
   parties: structuredClone(DEFAULT_PARTIES),
+  partyCounts: Object.fromEntries(Object.entries(BOSS_CONFIGS).map(([bossId, config]) => [bossId, config.partyCount])),
   search: "",
   collapsed: new Set(saved?.collapsed || []),
   drag: null
@@ -50,6 +51,7 @@ async function updateAuthUI(session) {
   accountName.textContent = currentNickname || profile.full_name || profile.name || user.email?.split("@")[0] || "사용자";
   dayOffToggle.checked = Boolean(siteProfile?.day_off);
   accountAvatar.src = profile.avatar_url || profile.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(accountName.textContent)}&background=7138d0&color=fff`;
+  await loadPartyCounts();
   await loadCharacters();
   subscribeToAssignments();
   if (!currentNickname) openNicknameDialog();
@@ -89,7 +91,10 @@ async function loadAssignments() {
     .select("boss_id,party_index,position,character_id")
     .order("position", { ascending: true });
   if (error) return showToast(`파티 조회 오류: ${error.message}`);
-  state.parties = structuredClone(DEFAULT_PARTIES);
+  state.parties = Object.fromEntries(Object.entries(BOSS_CONFIGS).map(([bossId, config]) => [
+    bossId,
+    Array.from({ length: state.partyCounts[bossId] || config.partyCount }, () => [])
+  ]));
   const validIds = new Set(state.characters.map(character => character.id));
   (data || []).forEach(assignment => {
     const config = BOSS_CONFIGS[assignment.boss_id];
@@ -99,11 +104,20 @@ async function loadAssignments() {
   renderAll();
 }
 
+async function loadPartyCounts() {
+  const { data, error } = await supabaseClient.from("boss_settings").select("boss_id,party_count");
+  if (error) return showToast(`파티 설정 조회 오류: ${error.message}`);
+  (data || []).forEach(setting => {
+    if (BOSS_CONFIGS[setting.boss_id]) state.partyCounts[setting.boss_id] = Math.max(BOSS_CONFIGS[setting.boss_id].partyCount, setting.party_count);
+  });
+}
+
 function subscribeToAssignments() {
   if (assignmentsChannel) return;
   assignmentsChannel = supabaseClient
     .channel("shared-party-assignments")
     .on("postgres_changes", { event: "*", schema: "public", table: "party_assignments" }, applyRealtimeAssignment)
+    .on("postgres_changes", { event: "*", schema: "public", table: "boss_settings" }, async () => { await loadPartyCounts(); await loadAssignments(); })
     .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => loadCharacters())
     .on("postgres_changes", { event: "UPDATE", schema: "public", table: "characters" }, () => loadCharacters())
     .subscribe();
@@ -230,6 +244,29 @@ bossTabs.addEventListener("click", event => {
   if (!tab) return;
   state.boss = tab.dataset.boss;
   save(); renderAll();
+});
+
+addParty.addEventListener("click", async () => {
+  if (!currentUser) return showToast("로그인 후 파티를 추가할 수 있습니다.");
+  const bossId = state.boss;
+  const previousCount = state.partyCounts[bossId];
+  const partyCount = previousCount + 1;
+  state.partyCounts[bossId] = partyCount;
+  state.parties[bossId].push([]);
+  renderAll();
+  const { error } = await supabaseClient.from("boss_settings").upsert({
+    boss_id: bossId,
+    party_count: partyCount,
+    updated_by: currentUser.id,
+    updated_at: new Date().toISOString()
+  }, { onConflict: "boss_id" });
+  if (error) {
+    state.partyCounts[bossId] = previousCount;
+    state.parties[bossId].pop();
+    renderAll();
+    return showToast(`파티 추가 오류: ${error.message}`);
+  }
+  showToast(`파티 ${partyCount}을 추가했습니다.`);
 });
 
 characterGroups.addEventListener("click", event => {
