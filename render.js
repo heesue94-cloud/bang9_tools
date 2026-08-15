@@ -123,7 +123,8 @@ function renderParties() {
     const classNames = new Set(partyCharacters.map(character => character.className));
     const tankReady = ["아란", "닼나", "뻥"].some(name => classNames.has(name));
     const sharpReady = ["보마", "샤프"].some(name => classNames.has(name));
-    const requirements = `${tankReady ? "" : '<b class="requirement-tag missing-tank">콤베없음</b><b class="requirement-tag missing-tank">피뻥없음</b>'}${sharpReady ? "" : '<b class="requirement-tag missing-sharp">샤프없음</b>'}`;
+    const resurrectionReady = partyCharacters.some(character => character.role === "buffer" && character.className === "리저");
+    const requirements = `${tankReady ? "" : '<b class="requirement-tag missing-tank">콤베없음</b><b class="requirement-tag missing-tank">피뻥없음</b>'}${resurrectionReady ? "" : '<b class="requirement-tag missing-tank">리저없음</b>'}${sharpReady ? "" : '<b class="requirement-tag missing-sharp">샤프없음</b>'}`;
     const buffIcons = PARTY_BUFF_ICONS.filter(buff => partyCharacters.some(buff.active))
       .map(buff => `<img class="party-buff-icon" src="${buff.src}" alt="${buff.name}" title="${buff.name}">`).join("");
     const arrangedSlots = arrangePartySlots(partyCharacters, config.maxMembers, state.boss);
