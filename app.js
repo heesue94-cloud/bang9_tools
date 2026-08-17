@@ -16,10 +16,11 @@ const state = {
 };
 let currentUser = null;
 let currentNickname = "";
+let currentCanManageAll = false;
 let assignmentsChannel = null;
 
 function canArrangeCharacter(character) {
-  return Boolean(character && (character.isMine || currentNickname === "방구"));
+  return Boolean(character && (character.isMine || currentCanManageAll));
 }
 
 function save() {
@@ -40,14 +41,16 @@ async function updateAuthUI(session) {
   authUser.hidden = !user;
   if (!user) {
     currentNickname = "";
+    currentCanManageAll = false;
     state.characters = [];
     renderAll();
     return;
   }
 
   const profile = user.user_metadata || {};
-  const { data: siteProfile } = await supabaseClient.from("profiles").select("nickname,day_off").eq("user_id", user.id).maybeSingle();
+  const { data: siteProfile } = await supabaseClient.from("profiles").select("nickname,day_off,can_manage_all").eq("user_id", user.id).maybeSingle();
   currentNickname = siteProfile?.nickname || "";
+  currentCanManageAll = Boolean(siteProfile?.can_manage_all);
   accountName.textContent = currentNickname || profile.full_name || profile.name || user.email?.split("@")[0] || "사용자";
   dayOffToggle.checked = Boolean(siteProfile?.day_off);
   accountAvatar.src = profile.avatar_url || profile.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(accountName.textContent)}&background=7138d0&color=fff`;
