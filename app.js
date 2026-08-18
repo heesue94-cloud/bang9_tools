@@ -62,7 +62,7 @@ async function updateAuthUI(session) {
 
 async function loadCharacters() {
   const [{ data: rows, error }, { data: profiles }] = await Promise.all([
-    supabaseClient.from("characters").select("id,user_id,class_name,role,power,is_unavailable,created_at").order("created_at"),
+    supabaseClient.from("characters").select("id,user_id,class_name,role,power,account_label,is_unavailable,created_at").order("created_at"),
     supabaseClient.from("profiles").select("user_id,nickname,color,day_off")
   ]);
   if (error) return showToast(`캐릭터 조회 오류: ${error.message}`);
@@ -79,6 +79,7 @@ async function loadCharacters() {
     className: character.class_name,
     role: character.role,
     power: character.power,
+    accountLabel: character.account_label?.trim() || "",
     icon: character.role === "dps" ? "⚔" : "✦",
     color: character.role === "dps" ? "red" : "mint"
   }));
@@ -172,6 +173,14 @@ async function moveCharacter(characterId, targetParty, targetSlot) {
   if (targetParty !== null) {
     const target = state.parties[state.boss][targetParty];
     const alreadyInTarget = target.includes(characterId);
+    const sameAccountCharacter = character.accountLabel && target.map(byId).find(item =>
+      item && item.id !== characterId && item.userId === character.userId &&
+      item.accountLabel && item.accountLabel.toLocaleLowerCase("ko-KR") === character.accountLabel.toLocaleLowerCase("ko-KR")
+    );
+    if (sameAccountCharacter) {
+      showToast(`${sameAccountCharacter.className} 캐릭터와 동일 계정이라 배치할 수 없습니다.`);
+      return false;
+    }
     if (!alreadyInTarget && target.length >= BOSS_CONFIGS[state.boss].maxMembers) { showToast("파티 정원이 가득 찼습니다."); return false; }
     const roleLimit = character.role === "dps" ? BOSS_CONFIGS[state.boss].maxDps : BOSS_CONFIGS[state.boss].maxBuffers;
     if (!alreadyInTarget && roleLimit) {

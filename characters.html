@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="style.css?v=20260815-2">
   <link rel="stylesheet" href="auth.css?v=20260815-8">
   <link rel="stylesheet" href="characters.css?v=20260815-1">
-  <link rel="stylesheet" href="characters-v2.css?v=20260815-3">
+  <link rel="stylesheet" href="characters-v2.css?v=20260818-1">
 </head>
 <body>
   <header class="topbar">
@@ -48,6 +48,7 @@
       <div class="form-grid role-form-grid">
         <label>역할군<select name="role" id="roleGroup"><option value="dps">격수</option><option value="buffer">버프</option></select></label>
         <label>격수 / 버프<select name="className" id="classChoice" required></select></label>
+        <label class="full-field">계정<input name="accountLabel" maxlength="30" placeholder="예: 본계정, 부계정1 (미설정 가능)"></label>
         <label class="full-field power-field" id="powerField">스공<input name="power" maxlength="20" placeholder="예: 5,280만"></label>
       </div>
       <p class="form-error" id="formError"></p>
@@ -67,6 +68,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="characters.js?v=20260815-8"></script>
+  <script src="characters.js?v=20260818-1"></script>
 </body>
 </html>

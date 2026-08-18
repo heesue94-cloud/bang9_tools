@@ -45,10 +45,11 @@ function renderCharacters() {
   }
 
   myRoster.innerHTML = `<div class="roster-table">
-    <div class="roster-table-head"><span>역할군</span><span>격수 / 버프</span><span>스공</span><span>등록일</span><span></span></div>
+    <div class="roster-table-head"><span>역할군</span><span>격수 / 버프</span><span>계정</span><span>스공</span><span>등록일</span><span></span></div>
     ${characters.map(character => `<article class="roster-row">
       <span><b class="role role-${character.role}">${roleNames[character.role]}</b></span>
       <span class="character-name"><i>${escapeHTML(character.class_name.slice(0, 1))}</i><strong>${escapeHTML(character.class_name)}</strong></span>
+      <span class="account-label">${escapeHTML(character.account_label || "미설정")}</span>
       <span>${character.role === "dps" ? escapeHTML(character.power || "—") : "—"}</span>
       <span>${new Date(character.created_at).toLocaleDateString("ko-KR")}</span>
       <span class="row-actions"><button class="edit-character" data-edit="${character.id}" aria-label="${escapeHTML(character.class_name)} 수정">수정</button><button class="delete-character" data-delete="${character.id}" aria-label="${escapeHTML(character.class_name)} 삭제">삭제</button></span>
@@ -136,6 +137,7 @@ function openDialog(character = null) {
   updateRoleFields();
   if (character) {
     classChoice.value = character.class_name;
+    newCharacterForm.elements.accountLabel.value = character.account_label || "";
     newCharacterForm.elements.power.value = character.power || "";
   }
   dialogEyebrow.textContent = character ? "EDIT CHARACTER" : "NEW CHARACTER";
@@ -169,6 +171,7 @@ newCharacterForm.addEventListener("submit", async event => {
     class_name: form.get("className"),
     level: null,
     role: form.get("role"),
+    account_label: form.get("accountLabel").trim() || null,
     power: form.get("role") === "dps" ? form.get("power").trim() || null : null
   };
   const query = editingCharacterId
